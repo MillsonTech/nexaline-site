@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexaLine — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #080C14;
+  --surface:   #0F1624;
+  --elevated:  #182030;
+  --border:    rgba(255,255,255,0.07);
+  --blue:      #1E6BFF;
+  --blue-glow: rgba(30,107,255,0.25);
+  --cyan:      #00D4FF;
+  --cyan-glow: rgba(0,212,255,0.18);
+  --green:     #10B981;
+  --amber:     #F59E0B;
+  --red:       #EF4444;
+  --red-glow:  rgba(239,68,68,0.22);
+  --text:      #FFFFFF;
+  --text-soft: #C8D6EF;
+  --text-mute: #5A6A84;
+  --sidebar-w: 260px;
+  --radius:    14px;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  overflow-x: hidden;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.logo-lockup {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-decoration: none;
+}
+.logo-mark {
+  width: 38px; height: 38px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #1E6BFF, #0044cc);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px; font-weight: 900;
+  color: #fff;
+  letter-spacing: -1px;
+  box-shadow: 0 0 18px rgba(30,107,255,0.4);
+  flex-shrink: 0;
+}
+.logo-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px; font-weight: 800;
+  letter-spacing: -0.4px;
+  line-height: 1;
+}
+.logo-name .nexa { color: #ffffff; }
+.logo-name .line { color: #00D4FF; }
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: var(--text-mute);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  position: relative;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+}
+.nav-item:hover {
+  color: var(--text-soft);
+  background: rgba(255,255,255,0.04);
+}
+.nav-item.active {
+  color: var(--text);
+  background: rgba(30,107,255,0.12);
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 20%; bottom: 20%;
+  width: 3px;
+  background: var(--blue);
+  border-radius: 0 3px 3px 0;
+  box-shadow: 0 0 10px var(--blue-glow);
+}
+.nav-item svg {
+  width: 18px; height: 18px;
+  flex-shrink: 0;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.nav-item.active svg { stroke: var(--blue); }
+
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-mute);
+  padding: 16px 14px 6px;
+}
+
+/* Sidebar footer — user + logout */
+.sidebar-footer {
+  padding: 16px 12px;
+  border-top: 1px solid var(--border);
+}
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  background: rgba(255,255,255,0.03);
+}
+.sidebar-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700; font-size: 14px;
+  color: #fff;
+  flex-shrink: 0;
+}
+.sidebar-user-info { min-width: 0; }
+.sidebar-user-name {
+  font-size: 13px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sidebar-user-role {
+  font-size: 11px; color: var(--text-mute);
+}
+
+/* LOGOUT BUTTON */
+.btn-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(239,68,68,0.3);
+  background: rgba(239,68,68,0.08);
+  color: #FF6B6B;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+.btn-logout:hover {
+  background: rgba(239,68,68,0.18);
+  border-color: rgba(239,68,68,0.6);
+  color: #FF4444;
+  box-shadow: 0 0 20px var(--red-glow);
+  transform: translateY(-1px);
+}
+.btn-logout svg {
+  width: 16px; height: 16px;
+  stroke: currentColor; fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* ── MOBILE TOP BAR ── */
+.mobile-bar {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 60px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  z-index: 200;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+.mobile-logo {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 18px; font-weight: 800;
+  background: linear-gradient(135deg, #fff, var(--cyan));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.mobile-menu-btn {
+  background: none; border: none;
+  color: var(--text-soft); cursor: pointer;
+  padding: 6px; border-radius: 8px;
+  display: flex;
+}
+.mobile-menu-btn svg {
+  width: 22px; height: 22px;
+  stroke: currentColor; fill: none;
+  stroke-width: 1.8; stroke-linecap: round;
+}
+
+/* overlay for mobile */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 99;
+}
+
+/* ── MAIN CONTENT ── */
+.main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  padding: 32px 32px 48px;
+  min-height: 100vh;
+}
+
+/* ── VIEWS ── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* Page header */
+.page-header {
+  margin-bottom: 28px;
+}
+.page-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 26px; font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.page-subtitle {
+  font-size: 14px; color: var(--text-mute);
+  margin-top: 4px;
+}
+
+/* ── STAT CARDS ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.stat-card.blue::after { background: var(--blue); box-shadow: 0 0 12px var(--blue); }
+.stat-card.cyan::after { background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
+.stat-card.green::after { background: var(--green); box-shadow: 0 0 12px var(--green); }
+
+.stat-label {
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--text-mute);
+  margin-bottom: 10px;
+}
+.stat-value {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 28px; font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.stat-value.mono {
+  font-family: 'Inter', sans-serif;
+  font-size: 24px;
+}
+.stat-card.cyan .stat-value { color: var(--cyan); }
+.stat-card.green .stat-value { color: var(--green); }
+.stat-icon {
+  position: absolute;
+  right: 16px; bottom: 14px;
+  opacity: 0.08;
+}
+.stat-icon svg {
+  width: 48px; height: 48px;
+  stroke: currentColor; fill: none;
+  stroke-width: 1.2;
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.card-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 15px; font-weight: 700;
+  margin-bottom: 18px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title svg {
+  width: 16px; height: 16px;
+  stroke: var(--blue); fill: none;
+  stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* QUICK BUY */
+.quick-buy-row {
+  display: flex; gap: 12px; align-items: flex-end;
+  flex-wrap: wrap;
+}
+.quick-buy-row .form-group {
+  flex: 1; min-width: 0;
+}
+.quick-buy-row .btn {
+  width: 100%;
+}
+@media (max-width: 480px) {
+  .quick-buy-row {
+    flex-direction: column;
+  }
+  .quick-buy-row .form-group {
+    width: 100%;
+  }
+  .quick-buy-row .btn {
+    width: 100%;
+  }
+}
+.form-group { flex: 1; }
+.form-label {
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--text-mute); margin-bottom: 8px; display: block;
+}
+.form-select, .form-input {
+  width: 100%;
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  padding: 11px 14px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+}
+.form-select:focus, .form-input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-glow);
+}
+.form-select option { background: #1a2235; }
+
+/* BUTTONS */
+.btn {
+  display: inline-flex; align-items: center;
+  justify-content: center; gap: 8px;
+  padding: 11px 22px;
+  border-radius: 10px;
+  font-size: 14px; font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer; border: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.btn svg {
+  width: 15px; height: 15px;
+  stroke: currentColor; fill: none;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+.btn-primary {
+  background: var(--blue);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: #2d7bff;
+  box-shadow: 0 4px 20px var(--blue-glow);
+  transform: translateY(-1px);
+}
+.btn-primary:disabled {
+  opacity: 0.5; cursor: not-allowed; transform: none;
+}
+.btn-ghost {
+  background: rgba(255,255,255,0.05);
+  color: var(--text-soft);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover {
+  background: rgba(255,255,255,0.09);
+  color: var(--text);
+}
+
+/* ORDERS TABLE */
+.orders-table { width: 100%; border-collapse: collapse; }
+.orders-table th {
+  text-align: left;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--text-mute);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.orders-table td {
+  padding: 13px 12px;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.orders-table tr:hover td { background: rgba(255,255,255,0.02); }
+.orders-table .otp-mono {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px; color: var(--cyan);
+  letter-spacing: 1px;
+}
+.orders-table .number-mono {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+}
+
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 99px;
+  font-size: 11px; font-weight: 600;
+}
+.badge-success { background: rgba(16,185,129,0.15); color: var(--green); }
+.badge-pending { background: rgba(245,158,11,0.15); color: var(--amber); }
+.badge-failed  { background: rgba(239,68,68,0.15); color: var(--red); }
+
+/* ── BUY NUMBER VIEW ── */
+.step-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 24px;
+}
+.step-back {
+  background: none; border: none;
+  color: var(--text-mute); cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 500;
+  padding: 6px 10px; border-radius: 8px;
+  transition: all 0.15s;
+}
+.step-back:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+.step-back svg {
+  width: 14px; height: 14px;
+  stroke: currentColor; fill: none;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+
+
+.service-card:hover {
+  border-color: var(--card-accent, var(--blue));
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+}
+
+
+
+@media (max-width: 400px) {
+  
+}
+
+@media (max-width: 400px) {
+  
+}
+
+
+@media (max-width: 400px) {
+  
+}
+
+
+
+
+
+.countries-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+.country-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex; align-items: center;
+  justify-content: space-between;
+}
+.country-card:hover {
+  border-color: var(--cyan);
+  background: rgba(0,212,255,0.05);
+  transform: translateY(-1px);
+}
+.country-flag { font-size: 22px; margin-right: 12px; }
+.country-name { font-size: 14px; font-weight: 600; }
+.country-price {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px; font-weight: 600;
+  color: var(--cyan);
+}
+
+/* Confirm panel */
+.confirm-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  max-width: 460px;
+}
+.confirm-panel .row {
+  display: flex; justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.confirm-panel .row:last-of-type { border: none; }
+.confirm-panel .row span:first-child { color: var(--text-mute); }
+.confirm-panel .row span:last-child { font-weight: 600; }
+.confirm-total .row span:last-child {
+  font-family: 'Inter', sans-serif;
+  color: var(--cyan); font-size: 18px;
+}
+
+/* OTP result */
+.otp-result {
+  background: linear-gradient(135deg, rgba(0,212,255,0.05), rgba(30,107,255,0.08));
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: var(--radius);
+  padding: 28px;
+  text-align: center;
+  max-width: 400px;
+}
+.otp-number {
+  font-family: 'Inter', sans-serif;
+  font-size: 20px; font-weight: 600;
+  color: var(--text-soft); margin-bottom: 4px;
+}
+.otp-code-display {
+  font-family: 'Inter', sans-serif;
+  font-size: 36px; font-weight: 600;
+  color: var(--cyan);
+  letter-spacing: 6px;
+  text-shadow: 0 0 20px var(--cyan-glow);
+  margin: 12px 0;
+}
+.otp-waiting {
+  color: var(--text-mute); font-size: 14px;
+  display: flex; align-items: center; gap: 8px; justify-content: center;
+}
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.1);
+  border-top-color: var(--cyan);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── FUND WALLET ── */
+.amount-pills {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  margin-bottom: 16px;
+}
+.amount-pill {
+  padding: 8px 18px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: var(--elevated);
+  color: var(--text-soft);
+  font-size: 13px; font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.amount-pill:hover, .amount-pill.selected {
+  border-color: var(--blue);
+  background: rgba(30,107,255,0.12);
+  color: var(--text);
+}
+
+/* ── PROFILE ── */
+.profile-hero {
+  background: linear-gradient(135deg, var(--surface), rgba(30,107,255,0.08));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  display: flex; align-items: center; gap: 24px;
+  margin-bottom: 24px;
+  position: relative; overflow: hidden;
+}
+.profile-hero::before {
+  content: '';
+  position: absolute; top: -60px; right: -60px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(0,212,255,0.08), transparent 70%);
+  pointer-events: none;
+}
+.profile-avatar-large {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 26px; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 4px rgba(30,107,255,0.2), 0 0 30px rgba(30,107,255,0.15);
+}
+.profile-info .name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 22px; font-weight: 800;
+  letter-spacing: -0.4px;
+}
+.profile-info .email { font-size: 14px; color: var(--text-mute); margin-top: 4px; }
+.profile-info .since {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 10px;
+  font-size: 11px; font-weight: 600;
+  color: var(--cyan);
+  background: rgba(0,212,255,0.08);
+  padding: 4px 10px; border-radius: 99px;
+  border: 1px solid rgba(0,212,255,0.15);
+}
+
+.profile-stats {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 14px; margin-bottom: 24px;
+}
+.profile-stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  text-align: center;
+}
+.profile-stat-val {
+  font-family: 'Inter', sans-serif;
+  font-size: 22px; font-weight: 600;
+  color: var(--cyan);
+}
+.profile-stat-label { font-size: 11px; color: var(--text-mute); margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+.danger-zone {
+  background: rgba(239,68,68,0.04);
+  border: 1px solid rgba(239,68,68,0.15);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+.danger-title {
+  font-size: 13px; font-weight: 700;
+  color: var(--red); text-transform: uppercase;
+  letter-spacing: 0.8px; margin-bottom: 8px;
+}
+.danger-desc { font-size: 13px; color: var(--text-mute); margin-bottom: 16px; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center; padding: 60px 20px;
+  color: var(--text-mute);
+}
+.empty-state svg {
+  width: 48px; height: 48px;
+  stroke: var(--text-mute); fill: none;
+  stroke-width: 1.2; stroke-linecap: round;
+  margin-bottom: 16px; opacity: 0.4;
+}
+.empty-state h3 { font-size: 15px; font-weight: 600; color: var(--text-soft); margin-bottom: 6px; }
+.empty-state p { font-size: 13px; }
+
+/* ── ALERTS ── */
+.alert {
+  padding: 12px 16px; border-radius: 10px;
+  font-size: 13px; font-weight: 500;
+  margin-bottom: 16px; display: none;
+}
+.alert.show { display: block; }
+.alert-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #FF6B6B; }
+.alert-success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); color: #34D399; }
+.alert-info { background: rgba(30,107,255,0.1); border: 1px solid rgba(30,107,255,0.25); color: #60A5FA; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .mobile-bar { display: flex; }
+  .sidebar {
+    transform: translateX(-100%);
+    top: 0;
+  }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-overlay.open { display: block; }
+  .main { margin-left: 0; padding: 80px 16px 48px; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .profile-stats { grid-template-columns: 1fr 1fr; }
+  .quick-buy-row { flex-direction: column; }
+  .profile-hero { flex-direction: column; text-align: center; }
+  .page-title { font-size: 20px; }
+}
+@media (max-width: 400px) {
+  
+  .profile-stats { grid-template-columns: 1fr; }
+}
+
+
+/* ── SERVICE CARDS ── */
+.svc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.svc-card {
+  background: #0d1220;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 14px 8px 12px;
+  cursor: pointer;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.15s;
+  overflow: hidden;
+}
+.svc-card:active {
+  border-color: #1E6BFF;
+  background: rgba(30,107,255,0.08);
+}
+.svc-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  margin: 0 auto 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.svc-icon svg {
+  width: 26px;
+  height: 26px;
+  display: block;
+}
+.svc-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #F0F4FF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  line-height: 1.3;
+}
+.svc-sub {
+  font-size: 8px;
+  color: #3D4F6B;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-top: 2px;
+}
+.cat-section {
+  margin-bottom: 24px;
+}
+.cat-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #3D4F6B;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cat-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+}
+
+</style>
+</head>
+<body>
+
+<div class="mobile-bar">
+  <div style="display:flex;align-items:center;gap:9px;">
+    <div style="width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#1E6BFF,#0044cc);display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:900;color:#fff;box-shadow:0 0 12px rgba(30,107,255,0.4);">N</div>
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;letter-spacing:-0.3px;"><span style="color:#fff;">Nexa</span><span style="color:#00D4FF;">Line</span></div>
+  </div>
+  <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Open menu">
+    <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+</div>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-lockup">
+      <div class="logo-mark">N</div>
+      <div class="logo-name"><span class="nexa">Nexa</span><span class="line">Line</span></div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <button class="nav-item active" data-view="home">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-item" data-view="buy">
+      <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18" stroke-width="2"/><path d="M9 7h6M9 11h4"/></svg>
+      Buy a Number
+    </button>
+    <button class="nav-item" data-view="orders">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+      My Orders
+    </button>
+
+    <div class="nav-section-label">Wallet</div>
+    <button class="nav-item" data-view="fund">
+      <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      Fund Wallet
+    </button>
+
+    <div class="nav-section-label">Account</div>
+    <button class="nav-item" data-view="profile">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </button>
+    <button class="nav-item" id="admin-nav-btn" style="display:none;color:#EF4444;" onclick="goToAdmin()">
+      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Admin Panel
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="sidebar-avatar">?</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="sidebar-name">Loading...</div>
+        <div class="sidebar-user-role">Member</div>
+      </div>
+    </div>
+    <button class="btn-logout" id="logout-btn">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main">
+
+  <!-- HOME VIEW -->
+  <div class="view active" id="view-home">
+    <div class="page-header">
+      <div class="page-title" id="home-greeting">Welcome back</div>
+      <div class="page-subtitle">Here's what's happening with your account today.</div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card cyan">
+        <div class="stat-label">Wallet Balance</div>
+        <div class="stat-value mono" id="home-balance">₦0</div>
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        </div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Total Orders</div>
+        <div class="stat-value" id="home-orders">0</div>
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Completed</div>
+        <div class="stat-value" id="home-success">0</div>
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Buy -->
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Quick Buy
+      </div>
+      <div class="quick-buy-row">
+        <div class="form-group">
+          <label class="form-label">Platform & Country</label>
+          <select class="form-select" id="quick-service-select">
+            <option value="">Loading services…</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="quick-buy-btn">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          Buy Now
+        </button>
+      </div>
+      <div id="quick-buy-alert" class="alert" style="margin-top:12px;"></div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Recent Activity
+      </div>
+      <div id="home-recent-orders">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <h3>No orders yet</h3>
+          <p>Your recent activity will appear here.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUY VIEW -->
+  <div class="view" id="view-buy">
+    <div id="buy-alert" class="alert"></div>
+
+    <!-- Step 1: Pick Service -->
+    <div id="buy-step-1">
+      <div class="page-header">
+        <div class="page-title">Buy a Number</div>
+        <div class="page-subtitle">Step 1 — What do you need to verify?</div>
+      </div>
+
+      <!-- Search -->
+      <div style="margin-bottom:20px;">
+        <input type="text" class="form-input" id="service-search"
+          placeholder="Search platform e.g. WhatsApp, Google..."
+          oninput="filterServices(this.value)"
+          style="max-width:400px;">
+      </div>
+
+      <div id="services-grid"></div>
+    </div>
+
+    <!-- Step 2: Pick Country -->
+    <div id="buy-step-2" style="display:none;">
+      <div class="step-header">
+        <button class="step-back" id="back-to-services">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <div>
+          <div class="page-title" style="font-size:20px;" id="step2-service-title"></div>
+          <div style="font-size:13px;color:var(--text-mute);">Step 2 — Pick a country</div>
+        </div>
+      </div>
+      <!-- Country search -->
+      <div style="margin-bottom:16px;">
+        <input type="text" class="form-input" id="country-search"
+          placeholder="Search country..."
+          oninput="filterCountries(this.value)"
+          style="max-width:360px;">
+      </div>
+      <div class="countries-grid" id="countries-grid"></div>
+    </div>
+
+    <!-- Step 3: Confirm -->
+    <div id="buy-step-3" style="display:none;">
+      <div class="step-header">
+        <button class="step-back" id="back-to-countries">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <div>
+          <div class="page-title" style="font-size:20px;">Confirm Order</div>
+          <div style="font-size:13px;color:var(--text-mute);">Step 3 — Review and buy</div>
+        </div>
+      </div>
+      <div class="confirm-panel confirm-total" style="max-width:420px;">
+        <div class="row"><span>Platform</span><span id="confirm-service"></span></div>
+        <div class="row"><span>Country</span><span id="confirm-country"></span></div>
+        <div class="row"><span>Price</span><span id="confirm-price"></span></div>
+        <div class="row"><span>Wallet after</span><span id="confirm-after"></span></div>
+      </div>
+      <div style="margin-top:20px;">
+        <button class="btn btn-primary" id="confirm-buy-btn" style="min-width:200px;">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Confirm &amp; Buy
+        </button>
+      </div>
+    </div>
+
+    <!-- OTP Result -->
+    <div id="buy-otp" style="display:none;margin-top:24px;">
+      <div class="otp-result">
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-mute);margin-bottom:8px;">Your Number</div>
+        <div class="otp-number" id="otp-number-display"></div>
+        <div style="font-size:12px;color:var(--text-mute);margin:10px 0 4px;">OTP Code</div>
+        <div class="otp-code-display" id="otp-code-display">
+          <div class="otp-waiting"><div class="spinner"></div>Waiting for SMS…</div>
+        </div>
+        <div style="font-size:12px;color:var(--text-mute);margin-top:8px;" id="otp-timer"></div>
+        <button class="btn btn-ghost" style="margin-top:16px;" onclick="resetBuyFlow()">Buy Another</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDERS VIEW -->
+  <div class="view" id="view-orders">
+    <div class="page-header">
+      <div class="page-title">My Orders</div>
+      <div class="page-subtitle">Your complete number purchase history.</div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div id="orders-content" style="padding:0;">
+        <div class="empty-state" style="padding:60px 20px;">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <h3>No orders yet</h3>
+          <p>Numbers you buy will show here.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FUND WALLET VIEW -->
+  <div class="view" id="view-fund">
+    <div class="page-header">
+      <div class="page-title">Fund Wallet</div>
+      <div class="page-subtitle">Add money to your NexaLine wallet to buy numbers.</div>
+    </div>
+    <div class="card" style="max-width:480px;">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        Choose Amount
+      </div>
+      <div class="amount-pills">
+        <button class="amount-pill" data-amount="500">₦500</button>
+        <button class="amount-pill" data-amount="1000">₦1,000</button>
+        <button class="amount-pill" data-amount="2000">₦2,000</button>
+        <button class="amount-pill" data-amount="5000">₦5,000</button>
+        <button class="amount-pill" data-amount="10000">₦10,000</button>
+      </div>
+      <div class="form-group" style="margin-bottom:20px;">
+        <label class="form-label">Or enter custom amount (₦)</label>
+        <input type="number" class="form-input" id="fund-amount" placeholder="Enter amount" min="100">
+      </div>
+      <div id="fund-alert" class="alert"></div>
+      <button class="btn btn-primary" id="fund-btn" style="width:100%;padding:13px;">
+        <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        Continue to Payment
+      </button>
+    </div>
+  </div>
+
+  <!-- PROFILE VIEW -->
+  <div class="view" id="view-profile">
+    <div class="page-header">
+      <div class="page-title">Profile</div>
+      <div class="page-subtitle">Manage your account details and security.</div>
+    </div>
+
+    <div class="profile-hero">
+      <div class="profile-avatar-large" id="profile-avatar-large">?</div>
+      <div class="profile-info">
+        <div class="name" id="profile-display-name">Loading…</div>
+        <div class="email" id="profile-display-email"></div>
+        <div class="since" id="profile-since">
+          <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Member since —
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-stats">
+      <div class="profile-stat">
+        <div class="profile-stat-val" id="pstat-balance">₦0</div>
+        <div class="profile-stat-label">Wallet Balance</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-val" id="pstat-orders">0</div>
+        <div class="profile-stat-label">Total Orders</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-val" id="pstat-spent">₦0</div>
+        <div class="profile-stat-label">Total Spent</div>
+      </div>
+    </div>
+
+    <!-- Edit Info -->
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Account Information
+      </div>
+      <div id="profile-alert" class="alert"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" class="form-input" id="profile-name" placeholder="Your name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="text" class="form-input" id="profile-phone" placeholder="e.g. 08012345678">
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:16px;">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" id="profile-email" disabled style="opacity:0.5;cursor:not-allowed;">
+        <div style="font-size:11px;color:var(--text-mute);margin-top:5px;">Email cannot be changed.</div>
+      </div>
+      <div style="margin-top:20px;">
+        <button class="btn btn-primary" id="save-profile-btn">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Save Changes
+        </button>
+      </div>
+    </div>
+
+    <!-- Change Password -->
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Change Password
+      </div>
+      <div id="password-alert" class="alert"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Current Password</label>
+          <input type="password" class="form-input" id="current-password" placeholder="Current password">
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Password</label>
+          <input type="password" class="form-input" id="new-password" placeholder="Min 8 characters">
+        </div>
+      </div>
+      <div style="margin-top:20px;">
+        <button class="btn btn-primary" id="change-password-btn">
+          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Update Password
+        </button>
+      </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="danger-zone">
+      <div class="danger-title">Danger Zone</div>
+      <div class="danger-desc">To delete your account or report an issue, contact support. This action cannot be undone.</div>
+      <button class="btn" style="border:1px solid rgba(239,68,68,0.3);background:transparent;color:var(--red);" onclick="alert('Contact support@nexaline.com to delete your account.')">
+        <svg viewBox="0 0 24 24" style="stroke:currentColor;fill:none;stroke-width:1.8;width:14px;height:14px;stroke-linecap:round;stroke-linejoin:round;"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        Delete Account
+      </button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const API = 'https://silver-giraffe-369149.hostingersite.com/api';
+
+// ── AUTH ──
+function getToken() { 
+  return sessionStorage.getItem('nx_token') || localStorage.getItem('nx_token'); 
+}
+function getUser() { 
+  try {
+    return JSON.parse(sessionStorage.getItem('nx_user') || localStorage.getItem('nx_user') || 'null');
+  } catch(e) { return null; }
+}
+
+if (!getToken()) {
+  window.location.href = 'nexaline-login-register.html';
+} else {
+  // Sync to sessionStorage if we got it from localStorage
+  if (!sessionStorage.getItem('nx_token') && localStorage.getItem('nx_token')) {
+    sessionStorage.setItem('nx_token', localStorage.getItem('nx_token'));
+    sessionStorage.setItem('nx_user', localStorage.getItem('nx_user') || '');
+  }
+}
+
+async function apiFetch(path, opts = {}) {
+  const res = await fetch(API + path, {
+    ...opts,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + getToken(),
+      ...(opts.headers || {})
+    }
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+// ── NAVIGATION ──
+let currentView = 'home';
+
+function switchView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelector(`[data-view="${name}"]`)?.classList.add('active');
+  currentView = name;
+  closeMobileSidebar();
+
+  if (name === 'home')    loadHomeData();
+  if (name === 'orders')  loadOrders();
+  if (name === 'buy')     resetBuyFlow();
+  if (name === 'profile') loadProfile();
+}
+
+document.querySelectorAll('.nav-item[data-view]').forEach(btn => {
+  btn.addEventListener('click', () => switchView(btn.dataset.view));
+});
+
+// ── MOBILE SIDEBAR ──
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebar-overlay');
+
+function closeMobileSidebar() {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('open');
+}
+
+document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('open');
+});
+overlay.addEventListener('click', closeMobileSidebar);
+
+// ── LOGOUT ──
+document.getElementById('logout-btn').addEventListener('click', () => {
+  if (!confirm('Sign out of NexaLine?')) return;
+  sessionStorage.removeItem('nx_token');
+  sessionStorage.removeItem('nx_user');
+  window.location.href = 'nexaline-login-register.html';
+});
+
+// ── INIT ──
+let userBalance = 0;
+let allServices = [];
+
+async function init() {
+  const user = getUser();
+  if (user) {
+    const initials = user.name ? user.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() : '?';
+    document.getElementById('sidebar-name').textContent = user.name || 'User';
+    document.getElementById('sidebar-avatar').textContent = initials;
+    document.getElementById('home-greeting').textContent = `Welcome back, ${user.name?.split(' ')[0] || 'there'} 👋`;
+  }
+  await loadBalance();
+  await loadServices();
+  loadHomeData();
+  // Check admin role from backend
+  try {
+    const data = await apiFetch('/auth/profile');
+    if (data.user && data.user.role === 'admin') {
+      const stored = getUser();
+      if (stored) { stored.role = 'admin'; sessionStorage.setItem('nx_user', JSON.stringify(stored)); localStorage.setItem('nx_user', JSON.stringify(stored)); }
+      const btn = document.getElementById('admin-nav-btn');
+      if (btn) btn.style.display = '';
+    }
+  } catch(e) {}
+}
+
+async function loadBalance() {
+  try {
+    const data = await apiFetch('/wallet/balance');
+    userBalance = data.balance_ngn || 0;
+    const fmt = '₦' + userBalance.toLocaleString();
+    document.getElementById('home-balance').textContent = fmt;
+  } catch(e) {}
+}
+
+async function loadServices() {
+  try {
+    const data = await apiFetch('/services');
+    allServices = data.services || [];
+    buildQuickBuyDropdown();
+  } catch(e) {}
+}
+
+function buildQuickBuyDropdown() {
+  const sel = document.getElementById('quick-service-select');
+  sel.innerHTML = '<option value="">— Select platform & country —</option>';
+
+  // Show service + country combinations, priority countries first
+  const priority = ['United States', 'United Kingdom', 'France', 'Canada', 'Germany'];
+  const sorted = [...allServices].sort((a, b) => {
+    // Sort by service name first, then priority country
+    if (a.name !== b.name) return a.name.localeCompare(b.name);
+    const ai = priority.indexOf(a.country);
+    const bi = priority.indexOf(b.country);
+    if (ai !== -1 && bi !== -1) return ai - bi;
+    if (ai !== -1) return -1;
+    if (bi !== -1) return 1;
+    return a.country.localeCompare(b.country);
+  });
+
+  sorted.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = `${s.name} — ${s.country}  (₦${s.price_ngn.toLocaleString()})`;
+    sel.appendChild(opt);
+  });
+}
+
+async function loadHomeData() {
+  try {
+    const data = await apiFetch('/orders');
+    const orders = data.orders || [];
+    document.getElementById('home-orders').textContent = orders.length;
+    document.getElementById('home-success').textContent = orders.filter(o=>o.status==='success').length;
+    renderRecentOrders(orders.slice(0,5));
+  } catch(e) {}
+}
+
+function renderRecentOrders(orders) {
+  const el = document.getElementById('home-recent-orders');
+  if (!orders.length) {
+    el.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><h3>No orders yet</h3><p>Your recent purchases will appear here.</p></div>`;
+    return;
+  }
+  el.innerHTML = `<table class="orders-table">
+    <thead><tr><th>Service</th><th>Number</th><th>OTP</th><th>Status</th></tr></thead>
+    <tbody>${orders.map(o => `
+      <tr>
+        <td>${o.service_name} <span style="color:var(--text-mute);font-size:12px;">${o.country}</span></td>
+        <td><span class="number-mono">${o.phone_number || '—'}</span></td>
+        <td><span class="otp-mono">${o.otp_code || '—'}</span></td>
+        <td><span class="badge badge-${o.status === 'success' ? 'success' : o.status === 'failed' ? 'failed' : 'pending'}">${o.status}</span></td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+
+// ── QUICK BUY ──
+document.getElementById('quick-buy-btn').addEventListener('click', async () => {
+  const serviceId = document.getElementById('quick-service-select').value;
+  const alertEl = document.getElementById('quick-buy-alert');
+  if (!serviceId) { showAlert(alertEl, 'Please select a service.', 'error'); return; }
+  const svc = allServices.find(s => s.id == serviceId);
+  if (svc && svc.price_ngn > userBalance) {
+    showAlert(alertEl, `Insufficient balance. You need ₦${svc.price_ngn.toLocaleString()} but have ₦${userBalance.toLocaleString()}.`, 'error');
+    return;
+  }
+  switchView('buy');
+});
+
+// ── BUY FLOW ──
+let selectedService = null;
+let selectedCountry = null;
+let filteredServices = [];
+let filteredCountries = [];
+
+const FLAGS = {
+  'United Kingdom':'🇬🇧','United States':'🇺🇸','Canada':'🇨🇦',
+  'Germany':'🇩🇪','France':'🇫🇷','Nigeria':'🇳🇬','India':'🇮🇳',
+  'Australia':'🇦🇺','Netherlands':'🇳🇱','Sweden':'🇸🇪',
+  'Poland':'🇵🇱','Spain':'🇪🇸','Italy':'🇮🇹','Brazil':'🇧🇷',
+  'Russia':'🇷🇺','Ukraine':'🇺🇦','Romania':'🇷🇴','Philippines':'🇵🇭',
+  'Indonesia':'🇮🇩','Kenya':'🇰🇪','Ghana':'🇬🇭','China':'🇨🇳',
+  'Japan':'🇯🇵','South Korea':'🇰🇷','Mexico':'🇲🇽','Argentina':'🇦🇷',
+  'Pakistan':'🇵🇰','Bangladesh':'🇧🇩','Vietnam':'🇻🇳','Thailand':'🇹🇭',
+  'Malaysia':'🇲🇾','South Africa':'🇿🇦','Egypt':'🇪🇬','Turkey':'🇹🇷',
+  'Saudi Arabia':'🇸🇦','UAE':'🇦🇪','Israel':'🇮🇱','Portugal':'🇵🇹',
+  'Czech Republic':'🇨🇿','Hungary':'🇭🇺','Bulgaria':'🇧🇬','Serbia':'🇷🇸',
+  'Croatia':'🇭🇷','Slovakia':'🇸🇰','Finland':'🇫🇮','Norway':'🇳🇴',
+  'Denmark':'🇩🇰','Belgium':'🇧🇪','Switzerland':'🇨🇭','Austria':'🇦🇹',
+  'Greece':'🇬🇷','New Zealand':'🇳🇿','Singapore':'🇸🇬','Hong Kong':'🇭🇰',
+  'Colombia':'🇨🇴','Peru':'🇵🇪','Chile':'🇨🇱','Venezuela':'🇻🇪',
+  'Morocco':'🇲🇦','Tunisia':'🇹🇳','Algeria':'🇩🇿','Ethiopia':'🇪🇹',
+  'Tanzania':'🇹🇿','Uganda':'🇺🇬','Zimbabwe':'🇿🇼','Cameroon':'🇨🇲',
+  'Moldova':'🇲🇩','Belarus':'🇧🇾','Kazakhstan':'🇰🇿','Uzbekistan':'🇺🇿',
+  'Georgia':'🇬🇪','Armenia':'🇦🇲','Azerbaijan':'🇦🇿','Latvia':'🇱🇻',
+  'Lithuania':'🇱🇹','Estonia':'🇪🇪','Ireland':'🇮🇪'
+};
+
+// Services list
+const ALL_SERVICES = [
+  {name:'WhatsApp',code:'wa',cat:'Most Popular'},
+  {name:'Instagram',code:'ig',cat:'Most Popular'},
+  {name:'Facebook',code:'fb',cat:'Most Popular'},
+  {name:'TikTok',code:'lf',cat:'Most Popular'},
+  {name:'Snapchat',code:'sc',cat:'Most Popular'},
+  {name:'Twitter / X',code:'tw',cat:'Most Popular'},
+  {name:'Telegram',code:'tg',cat:'Most Popular'},
+  {name:'YouTube',code:'yt',cat:'Most Popular'},
+  {name:'Google',code:'go',cat:'Most Popular',display:'Google Messenger'},
+  {name:'Discord',code:'ds',cat:'Most Popular'},
+  {name:'WeChat',code:'wc',cat:'Messaging'},
+  {name:'Viber',code:'vi',cat:'Messaging'},
+  {name:'Line',code:'ln',cat:'Messaging'},
+  {name:'Signal',code:'si',cat:'Messaging'},
+  {name:'Microsoft',code:'ms',cat:'Tech'},
+  {name:'Apple',code:'ap',cat:'Tech'},
+  {name:'Yahoo',code:'ya',cat:'Tech'},
+  {name:'LinkedIn',code:'li',cat:'Business'},
+  {name:'Shopify',code:'sh',cat:'Business'},
+  {name:'Airbnb',code:'ab',cat:'Business'},
+  {name:'Booking.com',code:'bk',cat:'Business'},
+  {name:'Amazon',code:'am',cat:'Shopping'},
+  {name:'eBay',code:'eb',cat:'Shopping'},
+  {name:'Alibaba',code:'al',cat:'Shopping'},
+  {name:'AliExpress',code:'ae',cat:'Shopping'},
+  {name:'PayPal',code:'pp',cat:'Finance'},
+  {name:'Netflix',code:'nf',cat:'Entertainment'},
+  {name:'Spotify',code:'sp',cat:'Entertainment'},
+  {name:'Steam',code:'st',cat:'Gaming'},
+  {name:'Tinder',code:'ti',cat:'Dating'},
+  {name:'Bumble',code:'bm',cat:'Dating'},
+  {name:'Uber',code:'ub',cat:'Travel'},
+  {name:'Any / Other',code:'any',cat:'Other'}
+];
+
+// Brand colors and SVG icons
+const BRANDS = {
+  'WhatsApp':     {bg:'#25D366', svg:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.121 1.535 5.857L.057 23.572a.75.75 0 00.92.92l5.716-1.478A11.952 11.952 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>'},
+  'Instagram':    {bg:'linear-gradient(135deg,#833AB4,#E1306C,#F77737)', svg:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>'},
+  'Facebook':     {bg:'#1877F2', svg:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>'},
+  'TikTok':       {bg:'#010101', svg:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.79 1.54V6.78a4.85 4.85 0 01-1.02-.09z"/></svg>'},
+  'Snapchat':     {bg:'#FFFC00', svg:'<svg viewBox="0 0 24 24" fill="#000"><path d="M12.166.006C9.579.006 4.99 1.63 4.99 7.407v1.86l-1.43.73c-.24.12-.37.37-.31.63l.23 1.01c.07.32.4.52.72.45l.8-.19c-.1.47-.19.95-.29 1.43-.37 1.74-2.03 2.62-3.36 3.1-.3.11-.43.46-.27.74l.44.8c.13.22.38.34.62.28.23-.06 2.78-.69 4.36-.69.83 0 1.58.25 2.31.75.7.47 1.52.73 2.37.73.85 0 1.67-.26 2.37-.73.73-.5 1.48-.75 2.31-.75 1.58 0 4.13.63 4.36.69.24.06.49-.06.62-.28l.44-.8c.16-.28.03-.63-.27-.74-1.33-.48-2.99-1.36-3.36-3.1-.1-.48-.19-.96-.29-1.43l.8.19c.32.07.65-.13.72-.45l.23-1.01c.06-.26-.07-.51-.31-.63l-1.43-.73V7.407C19.164 1.63 14.753.006 12.166.006z"/></svg>'},
+  'Twitter / X':  {bg:'#000', svg:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>'},
+  'Telegram':     {bg:'#229ED9', svg:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0a12 12 0 00-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>'},
+  'YouTube':      {bg:'#FF0000', svg:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>'},
+  'Google':       {bg:'#fff', svg:'<svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>'},
+  'Discord':      {bg:'#5865F2', svg:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.09.12 18.12.143 18.14a19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"/></svg>'},
+  'WeChat':       {bg:'#07C160', svg:'<svg viewBox="0 0 24 24" fill="#fff"><ellipse cx="9" cy="10" rx="6.5" ry="5"/><ellipse cx="16" cy="14" rx="5.5" ry="4.5"/></svg>'},
+  'Viber':        {bg:'#7B519D', svg:'<svg viewBox="0 0 24 24" fill="#fff"><circle cx="12" cy="12" r="10"/><path d="M8 9a4 4 0 018 0c0 3-2 5-4 6" stroke="#7B519D" stroke-width="1.5" fill="none"/></svg>'},
+  'Line':         {bg:'#00C300', svg:'<svg viewBox="0 0 24 24" fill="#fff"><rect x="3" y="5" width="18" height="14" rx="4"/><path d="M8 10h8M8 14h5" stroke="#00C300" stroke-width="1.5"/></svg>'},
+  'Signal':       {bg:'#3A76F0', svg:'<svg viewBox="0 0 24 24" fill="#fff"><circle cx="12" cy="12" r="10"/><path d="M8 12s1-3 4-3 4 3 4 3" stroke="#3A76F0" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>'},
+  'Microsoft':    {bg:'#fff', svg:'<svg viewBox="0 0 24 24"><rect x="2" y="2" width="9" height="9" fill="#F25022"/><rect x="13" y="2" width="9" height="9" fill="#7FBA00"/><rect x="2" y="13" width="9" height="9" fill="#00A4EF"/><rect x="13" y="13" width="9" height="9" fill="#FFB900"/></svg>'},
+  'Apple':        {bg:'#000', svg:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>'},
+  'Yahoo':        {bg:'#720E9E', svg:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M13.415 13.04l3.417-8.274h-2.179l-2.082 5.25-2.082-5.25H8.31l3.417 8.274v4.978h1.689V13.04z"/></svg>'},
+  'LinkedIn':     {bg:'#0077B5', svg:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>'},
+  'Shopify':      {bg:'#95BF47', svg:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M15.337.395s-.184-.013-.488-.013c-.25 0-.65.07-1.137.233C13.27.226 12.748 0 12.097 0 9.295 0 7.951 3.449 7.527 5.2L5.492 5.833l-1.992 12.734L15.854 21 21 19.855 15.337.395z"/></svg>'},
+  'Airbnb':       {bg:'#FF5A5F', svg:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1zm0 4a2.5 2.5 0 110 5 2.5 2.5 0 010-5zm4 12H8v-1c0-2.21 1.79-4 4-4s4 1.79 4 4v1z"/></svg>'},
+  'Booking.com':  {bg:'#003580', svg:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>'},
+  'Amazon':       {bg:'#FF9900', svg:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M.045 18.02c.072-.116.187-.124.348-.022 3.636 2.11 7.594 3.166 11.87 3.166 2.852 0 5.668-.533 8.447-1.595l.315-.14c.226-.088.39-.046.525.13.12.174.09.336-.12.48-1.244.743-2.64 1.316-4.185 1.726a17.617 17.617 0 01-10.96-.333c-1.47-.513-2.935-1.285-4.396-2.32-.278-.195-.33-.38-.13-.62l.286-.071zM6.559 13.23l.09-.135c1.86-2.758 4.59-4.142 8.19-4.143l.327.005c.267.006.527.025.777.057l.38.056.42.07c1.55.298 2.54.817 2.96 1.553.185.323.16.605-.06.838-.22.23-.55.293-1.01.206-.318-.063-.75-.166-1.29-.309l-.31-.076c-1.26-.234-2.36-.14-3.29.287-.932.428-1.622 1.095-2.07 2.002l-.07.152c-.49 1.133-.59 1.38-1.08 1.296l-.195-.026c-.53-.13-.73-.393-.59-.886l.024-.037z"/></svg>'},
+  'eBay':         {bg:'#f5f5f5', svg:'<svg viewBox="0 0 60 30"><text y="24" font-size="28" font-weight="900" font-family="Arial,sans-serif"><tspan fill="#E53238">e</tspan><tspan fill="#0064D2">B</tspan><tspan fill="#F5AF02">a</tspan><tspan fill="#86B817">y</tspan></text></svg>'},
+  'PayPal':       {bg:'#003087', svg:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M7.076 21.337H2.47a.641.641 0 01-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106z"/></svg>'},
+  'Netflix':      {bg:'#E50914', svg:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M5.398 0v.006c3.028 8.556 5.37 15.175 8.348 23.596 2.344.058 4.85.398 4.854.398-2.8-7.924-5.923-16.747-8.487-24zm8.489 0v9.63L18.6 24c-.608-.09-3.32-.08-4.713-.098V0zm-8.489 0H9.32v14.427L5.398 3.07z"/></svg>'},
+  'Spotify':      {bg:'#1DB954', svg:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>'},
+  'Steam':        {bg:'#1b2838', svg:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.718L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.606 0 11.979 0z"/></svg>'},
+  'Tinder':       {bg:'#FD5564', svg:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M8.214 0C8.395 4.98 5.75 7.248 3.544 9.25 1.38 11.21 0 13.593 0 16.797 0 20.795 3.728 24 8.333 24c4.606 0 8.334-3.205 8.334-7.162 0-.874-.173-1.71-.485-2.48-.943 1.64-2.866 2.754-5.057 2.754-3.117 0-5.646-2.26-5.646-5.048 0-1.82 1.043-3.42 2.617-4.354C9.246 6.81 10.65 4.94 10.65 2.5c0-.858-.183-1.671-.508-2.416C9.718.034 9.27 0 8.814 0h-.6z"/></svg>'},
+  'Bumble':       {bg:'#FFC629', svg:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#FFC629"/><path d="M7 12h10M12 7v10" stroke="#000" stroke-width="2.5" stroke-linecap="round"/></svg>'},
+  'Uber':         {bg:'#000', svg:'<svg viewBox="0 0 24 24" fill="#fff"><rect x="3" y="10" width="18" height="2.5" rx="1"/><rect x="3" y="14" width="11" height="2.5" rx="1"/></svg>'},
+  'Alibaba':      {bg:'#FF6A00', svg:'<svg viewBox="0 0 24 24" fill="#fff"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="5" fill="#FF6A00"/></svg>'},
+  'AliExpress':   {bg:'#E43226', svg:'<svg viewBox="0 0 24 24" fill="#fff"><circle cx="12" cy="12" r="10"/><path d="M8 12l4-4 4 4-4 4z"/></svg>'},
+  'Any / Other':  {bg:'#1E6BFF', svg:'<svg viewBox="0 0 24 24" fill="#fff"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke="#1E6BFF" stroke-width="2" stroke-linecap="round"/></svg>'},
+};
+
+function getBrand(name) {
+  return BRANDS[name] || {bg:'#1E6BFF', svg:'<svg viewBox="0 0 24 24" fill="#fff"><circle cx="12" cy="12" r="10"/></svg>'};
+}
+
+function makeServiceCard(s) {
+  const brand = getBrand(s.name);
+  const card = document.createElement('div');
+  card.className = 'svc-card';
+  card.onclick = function() { selectService(s.name, s.code, s.display || s.name); };
+
+  const icon = document.createElement('div');
+  icon.className = 'svc-icon';
+  icon.style.background = brand.bg;
+  icon.innerHTML = brand.svg;
+
+  const name = document.createElement('span');
+  name.className = 'svc-name';
+  name.textContent = s.display || s.name;
+
+  const sub = document.createElement('div');
+  sub.className = 'svc-sub';
+  sub.textContent = 'Verify';
+
+  card.appendChild(icon);
+  card.appendChild(name);
+  card.appendChild(sub);
+  return card;
+}
+
+function filterServices(q) {
+  const query = q.toLowerCase();
+  const filtered = ALL_SERVICES.filter(s =>
+    s.name.toLowerCase().includes(query) ||
+    (s.display||'').toLowerCase().includes(query)
+  );
+  renderServices(filtered);
+}
+
+function renderServices(list) {
+  const grid = document.getElementById('services-grid');
+  grid.innerHTML = '';
+
+  if (!list.length) {
+    grid.innerHTML = '<div style="padding:40px;text-align:center;color:#5A6A84;">No platforms found. Try a different search.</div>';
+    return;
+  }
+
+  const cats = {};
+  list.forEach(s => {
+    const c = s.cat || s.category || 'Other';
+    if (!cats[c]) cats[c] = [];
+    cats[c].push(s);
+  });
+
+  const order = ['Most Popular','Messaging','Tech','Business','Shopping','Finance','Entertainment','Gaming','Dating','Travel','Other'];
+
+  order.forEach(cat => {
+    if (!cats[cat]) return;
+    const section = document.createElement('div');
+    section.className = 'cat-section';
+
+    const title = document.createElement('div');
+    title.className = 'cat-title';
+    title.textContent = cat;
+    section.appendChild(title);
+
+    const row = document.createElement('div');
+    row.className = 'svc-grid';
+    cats[cat].forEach(s => row.appendChild(makeServiceCard(s)));
+    section.appendChild(row);
+    grid.appendChild(section);
+  });
+}
+
+
+
+// ── BUY FLOW ──
+function resetBuyFlow() {
+  document.getElementById('buy-step-1').style.display = 'block';
+  document.getElementById('buy-step-2').style.display = 'none';
+  document.getElementById('buy-step-3').style.display = 'none';
+  document.getElementById('service-search').value = '';
+  renderServices(ALL_SERVICES);
+}
+
+// ── SELECT SERVICE (Step 1 → Step 2) ──
+
+
+// Store countries for current service (for search filtering)
+let currentCountriesList = [];
+
+function filterCountries(query) {
+  const q = query.toLowerCase().trim();
+  if (!q) {
+    renderCountryGrid(currentCountriesList);
+    return;
+  }
+  const filtered = currentCountriesList.filter(s =>
+    s.country.toLowerCase().includes(q)
+  );
+  renderCountryGrid(filtered);
+}
+
+async function loadCountries(serviceName) {
+  const grid = document.getElementById('countries-grid');
+  grid.innerHTML = '<div style="padding:40px;text-align:center;color:#5A6A84;">Loading...</div>';
+  try {
+    // Use cached services if available - avoid re-fetching 1296 records every tap
+    if (!allServices.length) {
+      const data = await apiFetch('/services');
+      allServices = data.services || [];
+    }
+    const filtered = allServices.filter(s => s.name === serviceName);
+    currentCountriesList = filtered;
+    renderCountryGrid(filtered);
+  } catch(e) {
+    grid.innerHTML = '<div style="padding:40px;text-align:center;color:#EF4444;">Failed to load. Please try again.</div>';
+  }
+}
+
+function selectService(name, code, display) {
+  selectedService = { name, code, display: display || name };
+  document.getElementById('step2-service-title').textContent = (display || name) + ' Verification Number';
+  document.getElementById('buy-step-1').style.display = 'none';
+  document.getElementById('buy-step-2').style.display = 'block';
+  loadCountries(name);
+}
+
+function getServiceCard(s) {
+  const ico = SVC_ICONS[s.name] || SVC_ICONS['Any / Other'];
+  const card = document.createElement('div');
+  card.className = 'service-card';
+  card.onclick = function() { selectService(s.name, s.code, s.display || s.name); };
+  
+  const iconWrap = document.createElement('div');
+  iconWrap.className = 'svc-icon-wrap';
+  iconWrap.style.background = ico.bg;
+  iconWrap.innerHTML = ico.svg;
+  
+  const nameEl = document.createElement('div');
+  nameEl.className = 'service-name';
+  nameEl.textContent = s.display || s.name;
+  
+  const countEl = document.createElement('div');
+  countEl.className = 'service-count';
+  countEl.textContent = 'Verify';
+  
+  card.appendChild(iconWrap);
+  card.appendChild(nameEl);
+  card.appendChild(countEl);
+  return card;
+}
+
+
+function renderServiceGrid(services) {
+  const grid = document.getElementById('services-grid');
+  if (!services.length) {
+    grid.innerHTML = '<div class="empty-state"><h3>No platforms found</h3><p>Try a different search.</p></div>';
+    return;
+  }
+
+  const groups = {};
+  services.forEach(s => {
+    if (!groups[s.category]) groups[s.category] = [];
+    groups[s.category].push(s);
+  });
+
+  const catOrder = ['Most Popular','Messaging','Tech','Business','Shopping','Finance','Entertainment','Gaming','Dating','Travel','Other'];
+
+  grid.innerHTML = '';
+
+  catOrder.forEach(cat => {
+    if (!groups[cat]) return;
+    const section = document.createElement('div');
+    section.style.marginBottom = '24px';
+
+    const label = document.createElement('div');
+    label.className = 'cat-label';
+    label.textContent = cat;
+    section.appendChild(label);
+
+    const sgrid = document.createElement('div');
+    sgrid.className = 'services-grid';
+
+    groups[cat].forEach(s => {
+      sgrid.appendChild(getServiceCard(s));
+    });
+
+    section.appendChild(sgrid);
+    grid.appendChild(section);
+  });
+}
+
+
+function renderCountryGrid(countries) {
+  const grid = document.getElementById('countries-grid');
+
+  // DEDUPLICATE — keep only one entry per country (the one matching selected service)
+  const seen = {};
+  const unique = [];
+  countries.forEach(s => {
+    if (!seen[s.country]) {
+      seen[s.country] = true;
+      unique.push(s);
+    }
+  });
+
+  const priority = ['United States', 'United Kingdom', 'France', 'Canada', 'Germany'];
+  const sorted = unique.sort((a, b) => {
+    const ai = priority.indexOf(a.country);
+    const bi = priority.indexOf(b.country);
+    if (ai !== -1 && bi !== -1) return ai - bi;
+    if (ai !== -1) return -1;
+    if (bi !== -1) return 1;
+    return a.country.localeCompare(b.country);
+  });
+
+  if (!sorted.length) {
+    grid.innerHTML = `<div class="empty-state"><h3>No countries available</h3><p>Check back soon.</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = sorted.map(s => `
+    <div class="country-card" onclick="selectCountry(${s.id},'${s.country.replace(/'/g,"\'")}',${s.price_ngn})">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:26px;">${FLAGS[s.country] || '🌍'}</span>
+        <div>
+          <div style="font-weight:600;font-size:14px;">${s.country}</div>
+          <div style="font-size:11px;color:var(--text-mute);margin-top:2px;">Virtual number</div>
+        </div>
+      </div>
+      <span class="country-price">₦${s.price_ngn.toLocaleString()}</span>
+    </div>`).join('');
+}
+
+function selectCountry(id, country, price) {
+  selectedCountry = { id, country, price };
+  document.getElementById('confirm-service').textContent = selectedService?.name || 'Any';
+  document.getElementById('confirm-country').textContent = `${FLAGS[country] || '🌍'} ${country}`;
+  document.getElementById('confirm-price').textContent = `₦${price.toLocaleString()}`;
+  const after = userBalance - price;
+  document.getElementById('confirm-after').textContent = after >= 0 ? `₦${after.toLocaleString()}` : '⚠ Insufficient balance';
+  document.getElementById('buy-step-2').style.display = 'none';
+  document.getElementById('buy-step-3').style.display = '';
+}
+
+document.getElementById('back-to-services').addEventListener('click', () => {
+  document.getElementById('buy-step-2').style.display = 'none';
+  document.getElementById('buy-step-1').style.display = '';
+});
+document.getElementById('back-to-countries').addEventListener('click', () => {
+  document.getElementById('buy-step-3').style.display = 'none';
+  document.getElementById('buy-step-2').style.display = '';
+});
+
+document.getElementById('confirm-buy-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('confirm-buy-btn');
+  const alertEl = document.getElementById('buy-alert');
+  if (!selectedCountry) return;
+  if (selectedCountry.price > userBalance) {
+    showAlert(alertEl, 'Insufficient wallet balance. Please fund your wallet first.', 'error');
+    return;
+  }
+  btn.disabled = true; btn.textContent = 'Processing…';
+  try {
+    const data = await apiFetch('/orders/buy', {
+      method: 'POST',
+      body: JSON.stringify({ service_id: selectedCountry.id })
+    });
+    userBalance -= selectedCountry.price;
+    document.getElementById('buy-step-3').style.display = 'none';
+    document.getElementById('buy-otp').style.display = '';
+    document.getElementById('otp-number-display').textContent = data.phone_number || 'Assigning…';
+    pollForOTP(data.order_id);
+  } catch(e) {
+    showAlert(alertEl, e.message || 'Failed to place order.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg viewBox="0 0 24 24" style="stroke:currentColor;fill:none;stroke-width:2;width:15px;height:15px;stroke-linecap:round;stroke-linejoin:round;"><polyline points="20 6 9 17 4 12"/></svg> Confirm Purchase`;
+  }
+});
+
+let pollTimer = null;
+function pollForOTP(orderId) {
+  let elapsed = 0;
+  const max = 300;
+  const timerEl = document.getElementById('otp-timer');
+  clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    elapsed++;
+    timerEl.textContent = `Waiting… ${max - elapsed}s remaining`;
+    if (elapsed >= max) {
+      clearInterval(pollTimer);
+      document.getElementById('otp-code-display').innerHTML = '<span style="color:var(--amber)">Timed out — no SMS received</span>';
+      timerEl.textContent = '';
+      return;
+    }
+    try {
+      const data = await apiFetch(`/orders/${orderId}/check-otp`);
+      if (data.otp_code) {
+        clearInterval(pollTimer);
+        document.getElementById('otp-code-display').textContent = data.otp_code;
+        timerEl.textContent = 'OTP received ✓';
+        await loadBalance();
+      }
+    } catch(e) {}
+  }, 3000);
+}
+
+// ── ORDERS ──
+async function loadOrders() {
+  const el = document.getElementById('orders-content');
+  el.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-mute);">Loading…</div>';
+  try {
+    const data = await apiFetch('/orders');
+    const orders = data.orders || [];
+    if (!orders.length) {
+      el.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><h3>No orders yet</h3><p>Numbers you buy will appear here.</p></div>`;
+      return;
+    }
+    el.innerHTML = `<table class="orders-table">
+      <thead><tr><th>Service</th><th>Country</th><th>Number</th><th>OTP</th><th>Price</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody>${orders.map(o => `<tr>
+        <td><strong>${o.service_name}</strong></td>
+        <td>${FLAGS[o.country]||'🌍'} ${o.country}</td>
+        <td><span class="number-mono">${o.phone_number||'—'}</span></td>
+        <td><span class="otp-mono">${o.otp_code||'—'}</span></td>
+        <td style="font-family:'Inter', sans-serif">₦${o.price_ngn.toLocaleString()}</td>
+        <td><span class="badge badge-${o.status==='success'?'success':o.status==='failed'?'failed':'pending'}">${o.status}</span></td>
+        <td style="color:var(--text-mute);font-size:12px;">${new Date(o.created_at).toLocaleDateString()}</td>
+      </tr>`).join('')}</tbody></table>`;
+  } catch(e) {
+    el.innerHTML = `<div class="empty-state"><h3>Couldn't load orders</h3><p>${e.message}</p></div>`;
+  }
+}
+
+// ── FUND WALLET ──
+// ── FUND WALLET AMOUNT TRACKING ──
+let fundAmount = 0;
+
+document.querySelectorAll('.amount-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.amount-pill').forEach(p => p.classList.remove('selected'));
+    pill.classList.add('selected');
+    fundAmount = parseInt(pill.dataset.amount, 10);
+    document.getElementById('fund-amount').value = fundAmount;
+    hideAlert(document.getElementById('fund-alert'));
+  });
+});
+
+document.getElementById('fund-amount').addEventListener('input', function() {
+  fundAmount = parseInt(this.value, 10) || 0;
+  document.querySelectorAll('.amount-pill').forEach(p => p.classList.remove('selected'));
+});
+
+document.getElementById('fund-btn').addEventListener('click', async () => {
+  // Always read fresh from input too in case user typed manually
+  const typed = parseInt(document.getElementById('fund-amount').value, 10) || 0;
+  const amount = typed > 0 ? typed : fundAmount;
+  const alertEl = document.getElementById('fund-alert');
+  if (!amount || amount < 100) { showAlert(alertEl, 'Please enter an amount of at least ₦100.', 'error'); return; }
+  const btn = document.getElementById('fund-btn');
+  btn.disabled = true; btn.textContent = 'Redirecting…';
+  try {
+    const data = await apiFetch('/wallet/fund', {
+      method: 'POST',
+      body: JSON.stringify({ amount_ngn: amount, redirect_url: window.location.href })
+    });
+    if (data.payment_link) {
+      window.location.href = data.payment_link;
+    } else {
+      showAlert(alertEl, data.message || 'Payment initiated (stub mode)', 'info');
+      await loadBalance();
+    }
+  } catch(e) {
+    showAlert(alertEl, e.message || 'Could not reach the server.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg viewBox="0 0 24 24" style="stroke:currentColor;fill:none;stroke-width:2;width:15px;height:15px;stroke-linecap:round;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Continue to Payment`;
+  }
+});
+
+// ── PROFILE ──
+async function loadProfile() {
+  try {
+    const data = await apiFetch('/auth/profile');
+    const u = data.user;
+    const initials = u.name?.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() || '?';
+    document.getElementById('profile-avatar-large').textContent = initials;
+    document.getElementById('profile-display-name').textContent = u.name || '';
+    document.getElementById('profile-display-email').textContent = u.email || '';
+    document.getElementById('profile-since').innerHTML = `<svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Member since ${new Date(u.created_at).toLocaleDateString('en-GB',{month:'long',year:'numeric'})}`;
+    document.getElementById('profile-name').value = u.name || '';
+    document.getElementById('profile-email').value = u.email || '';
+    document.getElementById('profile-phone').value = u.phone || '';
+    document.getElementById('pstat-balance').textContent = '₦' + (u.wallet_balance_ngn||0).toLocaleString();
+    document.getElementById('pstat-orders').textContent = u.total_orders || 0;
+    document.getElementById('pstat-spent').textContent = '₦' + (u.total_spent||0).toLocaleString();
+  } catch(e) {}
+}
+
+document.getElementById('save-profile-btn').addEventListener('click', async () => {
+  const alertEl = document.getElementById('profile-alert');
+  try {
+    await apiFetch('/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: document.getElementById('profile-name').value.trim(),
+        phone: document.getElementById('profile-phone').value.trim()
+      })
+    });
+    // Update sidebar name
+    const name = document.getElementById('profile-name').value.trim();
+    document.getElementById('sidebar-name').textContent = name;
+    const initials = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('sidebar-avatar').textContent = initials;
+    document.getElementById('profile-avatar-large').textContent = initials;
+    document.getElementById('profile-display-name').textContent = name;
+    const stored = getUser(); if (stored) { stored.name = name; sessionStorage.setItem('nx_user', JSON.stringify(stored)); }
+    showAlert(alertEl, 'Profile updated successfully.', 'success');
+  } catch(e) {
+    showAlert(alertEl, e.message || 'Failed to save.', 'error');
+  }
+});
+
+document.getElementById('change-password-btn').addEventListener('click', async () => {
+  const alertEl = document.getElementById('password-alert');
+  const current = document.getElementById('current-password').value;
+  const next = document.getElementById('new-password').value;
+  if (!current || !next) { showAlert(alertEl, 'Please fill in both fields.', 'error'); return; }
+  if (next.length < 8) { showAlert(alertEl, 'New password must be at least 8 characters.', 'error'); return; }
+  try {
+    await apiFetch('/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ current_password: current, new_password: next })
+    });
+    document.getElementById('current-password').value = '';
+    document.getElementById('new-password').value = '';
+    showAlert(alertEl, 'Password updated successfully.', 'success');
+  } catch(e) {
+    showAlert(alertEl, e.message || 'Failed to update password.', 'error');
+  }
+});
+
+// ── HELPERS ──
+function showAlert(el, msg, type) {
+  el.textContent = msg;
+  el.className = `alert alert-${type} show`;
+  setTimeout(() => hideAlert(el), 5000);
+}
+function hideAlert(el) {
+  el.className = 'alert';
+  el.textContent = '';
+}
+
+// ── ADMIN ACCESS ──
+function goToAdmin() {
+  // Store token in localStorage temporarily so admin page can read it
+  const token = getToken();
+  const user = getUser();
+  if (token) localStorage.setItem('nx_token', token);
+  if (user) localStorage.setItem('nx_user', JSON.stringify(user));
+  window.location.href = 'nexaline-admin.html';
+}
+
+// Show admin button if user is admin
+function checkAdminAccess() {
+  try {
+    const user = getUser();
+    if (user && user.role === 'admin') {
+      const btn = document.getElementById('admin-nav-btn');
+      if (btn) btn.style.display = '';
+    }
+  } catch(e) {}
+}
+
+// ── START ──
+init();
+checkAdminAccess();
+</script>
+</body>
+</html>

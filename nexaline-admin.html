@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexaLine — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#05080f;
+  --surface:#090d17;
+  --card:#0d1220;
+  --elevated:#111827;
+  --border:rgba(255,255,255,0.06);
+  --border-bright:rgba(255,255,255,0.12);
+  --blue:#1E6BFF;
+  --blue-dim:rgba(30,107,255,0.15);
+  --blue-glow:rgba(30,107,255,0.3);
+  --cyan:#00D4FF;
+  --cyan-dim:rgba(0,212,255,0.12);
+  --green:#10B981;
+  --green-dim:rgba(16,185,129,0.12);
+  --amber:#F59E0B;
+  --amber-dim:rgba(245,158,11,0.12);
+  --red:#EF4444;
+  --red-dim:rgba(239,68,68,0.12);
+  --purple:#8B5CF6;
+  --purple-dim:rgba(139,92,246,0.12);
+  --pink:#EC4899;
+  --pink-dim:rgba(236,72,153,0.12);
+  --text:#F0F4FF;
+  --text-soft:#8899BB;
+  --text-mute:#3D4F6B;
+  --sidebar-w:260px;
+  --r:12px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;-webkit-font-smoothing:antialiased;}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar-w);background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;z-index:100;
+  transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.sidebar-logo{
+  padding:24px 20px 20px;
+  border-bottom:1px solid var(--border);
+}
+.logo-lockup{display:flex;align-items:center;gap:11px;}
+.logo-mark{
+  width:38px;height:38px;border-radius:11px;
+  background:linear-gradient(135deg,#1E6BFF,#0044cc);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:20px;font-weight:900;color:#fff;
+  box-shadow:0 0 20px rgba(30,107,255,0.4);
+  flex-shrink:0;
+}
+.logo-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.4px;line-height:1;}
+.logo-name .nexa{color:#fff;}
+.logo-name .line{color:var(--cyan);}
+.logo-badge{
+  font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;
+  background:rgba(239,68,68,0.15);color:#EF4444;
+  border:1px solid rgba(239,68,68,0.25);
+  padding:2px 6px;border-radius:4px;margin-left:2px;
+}
+
+.sidebar-nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;}
+.nav-section{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-mute);padding:14px 10px 6px;}
+
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:10px;
+  cursor:pointer;color:var(--text-soft);
+  font-size:13px;font-weight:500;
+  transition:all 0.15s;position:relative;
+  border:none;background:transparent;width:100%;text-align:left;
+}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,0.04);}
+.nav-item.active{color:#fff;background:var(--blue-dim);}
+.nav-item.active::before{
+  content:'';position:absolute;left:0;top:25%;bottom:25%;
+  width:3px;background:var(--blue);border-radius:0 3px 3px 0;
+  box-shadow:0 0 8px var(--blue-glow);
+}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.nav-item.active svg{stroke:var(--blue);}
+.nav-badge{
+  margin-left:auto;font-size:10px;font-weight:700;
+  background:var(--red);color:#fff;
+  padding:1px 6px;border-radius:99px;
+  display:none;
+}
+.nav-badge.show{display:block;}
+
+.sidebar-footer{padding:14px 12px;border-top:1px solid var(--border);}
+.admin-chip{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:10px;
+  background:rgba(255,255,255,0.03);margin-bottom:10px;
+}
+.admin-avatar{
+  width:34px;height:34px;border-radius:50%;
+  background:linear-gradient(135deg,var(--blue),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13px;color:#fff;
+  flex-shrink:0;
+}
+.admin-info-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.admin-info-role{font-size:10px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.8px;}
+.btn-signout{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:10px;border-radius:10px;
+  border:1px solid rgba(239,68,68,0.25);background:rgba(239,68,68,0.07);
+  color:#FF6B6B;font-size:13px;font-weight:600;
+  cursor:pointer;font-family:'Inter',sans-serif;
+  transition:all 0.2s;
+}
+.btn-signout:hover{background:rgba(239,68,68,0.15);box-shadow:0 0 16px rgba(239,68,68,0.2);}
+.btn-signout svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ── MOBILE BAR ── */
+.mobile-bar{
+  display:none;position:fixed;top:0;left:0;right:0;height:58px;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  z-index:200;align-items:center;justify-content:space-between;padding:0 18px;
+}
+.mobile-bar-logo{display:flex;align-items:center;gap:9px;}
+.mobile-menu-btn{background:none;border:none;color:var(--text-soft);cursor:pointer;padding:6px;display:flex;border-radius:8px;}
+.mobile-menu-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px);}
+
+/* ── MAIN ── */
+.main{margin-left:var(--sidebar-w);flex:1;padding:32px;min-height:100vh;}
+
+/* ── GATE ── */
+.gate{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;text-align:center;padding:40px;
+}
+.gate-icon{
+  width:64px;height:64px;border-radius:18px;
+  background:var(--red-dim);border:1px solid rgba(239,68,68,0.2);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 20px;
+}
+.gate-icon svg{width:28px;height:28px;stroke:var(--red);fill:none;stroke-width:1.8;stroke-linecap:round;}
+.gate h2{font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;margin-bottom:8px;}
+.gate p{font-size:14px;color:var(--text-soft);margin-bottom:24px;}
+.gate a{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:11px 24px;border-radius:10px;
+  background:var(--blue);color:#fff;font-size:14px;font-weight:600;
+  text-decoration:none;transition:all 0.2s;
+}
+.gate a:hover{background:#2d7bff;box-shadow:0 4px 20px var(--blue-glow);}
+
+/* ── PAGE HEADER ── */
+.page-header{margin-bottom:28px;}
+.page-title{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:24px;font-weight:800;letter-spacing:-0.4px;
+}
+.page-sub{font-size:13px;color:var(--text-soft);margin-top:4px;}
+
+/* ── STATS GRID ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.today-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+
+.stat-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:20px;
+  position:relative;overflow:hidden;
+  transition:transform 0.2s,box-shadow 0.2s;
+}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.3);}
+.stat-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  border-radius:var(--r) var(--r) 0 0;
+}
+.stat-card.blue::after{background:var(--blue);box-shadow:0 0 10px var(--blue);}
+.stat-card.cyan::after{background:var(--cyan);box-shadow:0 0 10px var(--cyan);}
+.stat-card.green::after{background:var(--green);box-shadow:0 0 10px var(--green);}
+.stat-card.amber::after{background:var(--amber);box-shadow:0 0 10px var(--amber);}
+.stat-card.red::after{background:var(--red);box-shadow:0 0 10px var(--red);}
+.stat-card.purple::after{background:var(--purple);box-shadow:0 0 10px var(--purple);}
+.stat-card.pink::after{background:var(--pink);box-shadow:0 0 10px var(--pink);}
+
+.stat-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-mute);margin-bottom:10px;}
+.stat-value{font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;font-weight:800;letter-spacing:-0.5px;line-height:1;}
+.stat-value.mono{font-size:22px;}
+.stat-today{font-size:11px;color:var(--green);font-weight:600;margin-top:6px;}
+.stat-today.red{color:var(--red);}
+.stat-bg-icon{
+  position:absolute;right:14px;bottom:12px;opacity:0.06;
+}
+.stat-bg-icon svg{width:42px;height:42px;stroke:currentColor;fill:none;stroke-width:1;}
+
+/* ── CARD ── */
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:24px;margin-bottom:20px;
+}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.card-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.card-title svg{width:15px;height:15px;stroke:var(--blue);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow:auto;border-radius:var(--r);border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;}
+thead th{
+  text-align:left;font-size:10px;font-weight:700;
+  text-transform:uppercase;letter-spacing:1px;
+  color:var(--text-mute);padding:12px 16px;
+  background:rgba(255,255,255,0.02);
+  border-bottom:1px solid var(--border);white-space:nowrap;
+}
+tbody td{
+  padding:13px 16px;font-size:13px;
+  border-bottom:1px solid rgba(255,255,255,0.03);
+}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:rgba(255,255,255,0.02);}
+.mono{font-size:12px;color:var(--cyan);}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;}
+.badge-success{background:var(--green-dim);color:var(--green);}
+.badge-pending{background:var(--amber-dim);color:var(--amber);}
+.badge-failed{background:var(--red-dim);color:var(--red);}
+.badge-active{background:var(--blue-dim);color:var(--blue);}
+
+/* ── INPUTS / BUTTONS ── */
+.form-group{margin-bottom:14px;}
+.form-label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-mute);margin-bottom:6px;}
+.form-input,.form-select,.form-textarea{
+  width:100%;background:var(--elevated);border:1px solid var(--border);
+  border-radius:9px;color:var(--text);padding:10px 14px;
+  font-size:13px;font-family:'Inter',sans-serif;outline:none;
+  transition:border-color 0.2s,box-shadow 0.2s;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim);}
+.form-textarea{resize:vertical;min-height:120px;}
+.form-select option{background:#1a2235;}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:10px 20px;border-radius:9px;font-size:13px;font-weight:600;
+  font-family:'Inter',sans-serif;cursor:pointer;border:none;
+  transition:all 0.18s;white-space:nowrap;
+}
+.btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.btn-primary{background:var(--blue);color:#fff;}
+.btn-primary:hover{background:#2d7bff;box-shadow:0 4px 18px var(--blue-glow);transform:translateY(-1px);}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,0.25);}
+.btn-danger:hover{background:rgba(239,68,68,0.2);}
+.btn-ghost{background:rgba(255,255,255,0.05);color:var(--text-soft);border:1px solid var(--border);}
+.btn-ghost:hover{background:rgba(255,255,255,0.09);color:var(--text);}
+.btn-sm{padding:6px 14px;font-size:12px;}
+
+/* ── SEARCH ── */
+.search-bar{
+  display:flex;align-items:center;gap:10px;
+  background:var(--elevated);border:1px solid var(--border);
+  border-radius:9px;padding:9px 14px;margin-bottom:16px;
+}
+.search-bar svg{width:15px;height:15px;stroke:var(--text-mute);fill:none;stroke-width:1.8;flex-shrink:0;}
+.search-bar input{background:none;border:none;color:var(--text);font-size:13px;outline:none;width:100%;font-family:'Inter',sans-serif;}
+.search-bar input::placeholder{color:var(--text-mute);}
+
+/* ── ALERT ── */
+.alert{padding:11px 14px;border-radius:9px;font-size:12px;font-weight:500;margin-bottom:14px;display:none;}
+.alert.show{display:block;}
+.alert-error{background:var(--red-dim);border:1px solid rgba(239,68,68,0.2);color:#FF6B6B;}
+.alert-success{background:var(--green-dim);border:1px solid rgba(16,185,129,0.2);color:#34D399;}
+.alert-info{background:var(--blue-dim);border:1px solid rgba(30,107,255,0.2);color:#60A5FA;}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:48px 20px;color:var(--text-mute);}
+.empty svg{width:40px;height:40px;stroke:var(--text-mute);fill:none;stroke-width:1.2;stroke-linecap:round;opacity:0.4;margin-bottom:12px;}
+.empty h3{font-size:14px;font-weight:600;color:var(--text-soft);margin-bottom:4px;}
+.empty p{font-size:12px;}
+
+/* ── USER MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;}
+.modal-box{
+  background:var(--card);border:1px solid var(--border-bright);
+  border-radius:18px;padding:28px;width:100%;max-width:440px;
+  position:relative;box-shadow:0 24px 64px rgba(0,0,0,0.5);
+}
+.modal-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;margin-bottom:20px;}
+.modal-close{
+  position:absolute;top:16px;right:16px;
+  background:rgba(255,255,255,0.06);border:none;border-radius:8px;
+  color:var(--text-soft);cursor:pointer;padding:6px;display:flex;
+  transition:all 0.15s;
+}
+.modal-close:hover{background:rgba(255,255,255,0.1);color:var(--text);}
+.modal-close svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;}
+.modal-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.modal-row:last-of-type{border:none;}
+.modal-row span:first-child{color:var(--text-soft);}
+.modal-row span:last-child{font-weight:600;}
+.modal-actions{display:flex;gap:10px;margin-top:20px;}
+
+/* ── PROMO ── */
+.promo-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){
+  .stats-grid,.today-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:768px){
+  .mobile-bar{display:flex;}
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .sidebar-overlay.open{display:block;}
+  .main{margin-left:0;padding:72px 16px 48px;}
+  .stats-grid,.today-grid{grid-template-columns:1fr 1fr;}
+  .promo-form-grid{grid-template-columns:1fr;}
+  .modal-box{margin:16px;}
+}
+@media(max-width:480px){
+  .stats-grid,.today-grid{grid-template-columns:1fr 1fr;}
+  .stat-value{font-size:20px;}
+  .page-title{font-size:20px;}
+}
+
+/* ── VIEWS ── */
+.view{display:none;}
+.view.active{display:block;}
+</style>
+</head>
+<body>
+
+<!-- Mobile bar -->
+<div class="mobile-bar">
+  <div class="mobile-bar-logo">
+    <div class="logo-mark" style="width:32px;height:32px;font-size:16px;border-radius:9px;">N</div>
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;font-weight:800;"><span class="nexa" style="color:#fff;">Nexa</span><span class="line" style="color:var(--cyan);">Line</span></div>
+    <span class="logo-badge">Admin</span>
+  </div>
+  <button class="mobile-menu-btn" id="mobile-menu-btn">
+    <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+</div>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-lockup">
+      <div class="logo-mark">N</div>
+      <div>
+        <div class="logo-name"><span class="nexa">Nexa</span><span class="line">Line</span></div>
+        <span class="logo-badge">Admin Panel</span>
+      </div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">Overview</div>
+    <button class="nav-item active" data-view="overview">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-item" data-view="today">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Today's Activity
+      <span class="nav-badge" id="badge-today">0</span>
+    </button>
+    <button class="nav-item" data-view="pending">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Active Numbers
+      <span class="nav-badge" id="badge-pending">0</span>
+    </button>
+
+    <div class="nav-section">Users</div>
+    <button class="nav-item" data-view="users">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      All Users
+    </button>
+    <button class="nav-item" data-view="orders">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+      All Orders
+    </button>
+    <button class="nav-item" data-view="transactions">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Transactions
+    </button>
+
+    <div class="nav-section">Tools</div>
+    <button class="nav-item" data-view="promos">
+      <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      Promo Codes
+    </button>
+    <button class="nav-item" data-view="bulkemail">
+      <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      Bulk Email
+    </button>
+    <button class="nav-item" data-view="services">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+      Services & Pricing
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="admin-chip">
+      <div class="admin-avatar" id="admin-avatar">A</div>
+      <div>
+        <div class="admin-info-name" id="admin-name">Admin</div>
+        <div class="admin-info-role">Super Admin</div>
+      </div>
+    </div>
+    <button class="btn-signout" id="signout-btn">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- Gate -->
+<div class="gate" id="admin-gate" style="display:none;width:100%;">
+  <div class="gate-icon">
+    <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+  </div>
+  <h2>Access Denied</h2>
+  <p id="gate-msg">You must be logged in as an admin to view this page.</p>
+  <a href="nexaline-login-register.html">Go to Login</a>
+</div>
+
+<!-- Main -->
+<main class="main" id="admin-app" style="display:none;">
+
+  <!-- OVERVIEW -->
+  <div class="view active" id="view-overview">
+    <div class="page-header">
+      <div class="page-title">Dashboard</div>
+      <div class="page-sub">Welcome back. Here's what's happening on NexaLine.</div>
+    </div>
+
+    <!-- Today stats -->
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-mute);margin-bottom:10px;">Today</div>
+    <div class="today-grid">
+      <div class="stat-card green">
+        <div class="stat-label">Register Today</div>
+        <div class="stat-value" id="today-register">—</div>
+        <div class="stat-bg-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Recharge Today</div>
+        <div class="stat-value mono" id="today-recharge">—</div>
+        <div class="stat-bg-icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-label">OTP Sold Today</div>
+        <div class="stat-value" id="today-otp-sell">—</div>
+        <div class="stat-bg-icon"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18" stroke-width="2"/></svg></div>
+      </div>
+      <div class="stat-card cyan">
+        <div class="stat-label">Revenue Today</div>
+        <div class="stat-value mono" id="today-revenue">—</div>
+        <div class="stat-bg-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+      </div>
+    </div>
+
+    <!-- All-time stats -->
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-mute);margin-bottom:10px;">All Time</div>
+    <div class="stats-grid" style="margin-bottom:24px;">
+      <div class="stat-card blue">
+        <div class="stat-label">Total Users</div>
+        <div class="stat-value" id="stat-users">—</div>
+        <div class="stat-today" id="stat-users-today"></div>
+        <div class="stat-bg-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+      </div>
+      <div class="stat-card cyan">
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value mono" id="stat-revenue">—</div>
+        <div class="stat-bg-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-label">Total OTP Sold</div>
+        <div class="stat-value" id="total-otp-sell">—</div>
+        <div class="stat-bg-icon"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/></svg></div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">Pending OTPs</div>
+        <div class="stat-value" id="total-pending">—</div>
+        <div class="stat-bg-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Success Rate</div>
+        <div class="stat-value" id="stat-success">—</div>
+        <div class="stat-bg-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-label">Total User Balance</div>
+        <div class="stat-value mono" id="total-user-balance">—</div>
+        <div class="stat-bg-icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+      </div>
+      <div class="stat-card pink">
+        <div class="stat-label">Active Orders</div>
+        <div class="stat-value" id="stat-active">—</div>
+        <div class="stat-bg-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Active Users Today</div>
+        <div class="stat-value" id="today-active-users">—</div>
+        <div class="stat-bg-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      </div>
+    </div>
+
+    <!-- Recent transactions -->
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Recent Transactions
+        </div>
+      </div>
+      <div id="recent-tx-body">
+        <div class="empty"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><h3>Loading...</h3></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TODAY'S ACTIVITY -->
+  <div class="view" id="view-today">
+    <div class="page-header">
+      <div class="page-title">Today's Activity</div>
+      <div class="page-sub">All orders placed today in real time.</div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>User</th><th>Service</th><th>Country</th>
+          <th>Number</th><th>OTP</th><th>Price</th><th>Status</th><th>Time</th>
+        </tr></thead>
+        <tbody id="today-orders-body">
+          <tr><td colspan="8"><div class="empty"><h3>Loading...</h3></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ACTIVE NUMBERS -->
+  <div class="view" id="view-pending">
+    <div class="page-header">
+      <div class="page-title">Active Numbers</div>
+      <div class="page-sub">Numbers awaiting OTP — monitor stuck orders here.</div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>User</th><th>Service</th><th>Country</th>
+          <th>Number</th><th>Price</th><th>Ordered At</th>
+        </tr></thead>
+        <tbody id="pending-orders-body">
+          <tr><td colspan="6"><div class="empty"><h3>Loading...</h3></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- USERS -->
+  <div class="view" id="view-users">
+    <div class="page-header">
+      <div class="page-title">All Users</div>
+      <div class="page-sub">Manage your customer accounts.</div>
+    </div>
+    <div class="search-bar">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="user-search" placeholder="Search by name or email…" oninput="filterUsers(this.value)">
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Name</th><th>Email</th><th>Balance</th>
+          <th>Orders</th><th>Status</th><th>Joined</th><th>Action</th>
+        </tr></thead>
+        <tbody id="users-body">
+          <tr><td colspan="7"><div class="empty"><h3>Loading...</h3></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ORDERS -->
+  <div class="view" id="view-orders">
+    <div class="page-header">
+      <div class="page-title">All Orders</div>
+      <div class="page-sub">Complete order history across all users.</div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>User</th><th>Service</th><th>Country</th>
+          <th>Number</th><th>OTP</th><th>Price</th><th>Status</th><th>Date</th>
+        </tr></thead>
+        <tbody id="orders-body">
+          <tr><td colspan="8"><div class="empty"><h3>Loading...</h3></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TRANSACTIONS -->
+  <div class="view" id="view-transactions">
+    <div class="page-header">
+      <div class="page-title">Transactions</div>
+      <div class="page-sub">All wallet funding and purchase records.</div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>User</th><th>Type</th><th>Amount</th>
+          <th>Reference</th><th>Status</th><th>Date</th>
+        </tr></thead>
+        <tbody id="transactions-body">
+          <tr><td colspan="6"><div class="empty"><h3>Loading...</h3></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PROMO CODES -->
+  <div class="view" id="view-promos">
+    <div class="page-header">
+      <div class="page-title">Promo Codes</div>
+      <div class="page-sub">Create and manage discount codes for your customers.</div>
+    </div>
+    <div class="card" style="max-width:520px;margin-bottom:24px;">
+      <div class="card-title" style="margin-bottom:16px;">
+        <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        Create New Code
+      </div>
+      <div class="promo-form-grid">
+        <div class="form-group">
+          <label class="form-label">Code</label>
+          <input type="text" class="form-input" id="promo-code" placeholder="e.g. NEXA20">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Discount %</label>
+          <input type="number" class="form-input" id="promo-percent" placeholder="e.g. 20" min="0" max="100">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fixed Discount (₦)</label>
+          <input type="number" class="form-input" id="promo-ngn" placeholder="e.g. 500" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Max Uses</label>
+          <input type="number" class="form-input" id="promo-max" placeholder="100" value="100" min="1">
+        </div>
+      </div>
+      <div id="promo-alert" class="alert"></div>
+      <button class="btn btn-primary" onclick="createPromo()">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Create Promo Code
+      </button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Code</th><th>Discount</th><th>Uses</th><th>Created</th><th>Action</th></tr></thead>
+        <tbody id="promos-body">
+          <tr><td colspan="5"><div class="empty"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><h3>No promo codes yet</h3><p>Create your first discount code above.</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- BULK EMAIL -->
+  <div class="view" id="view-bulkemail">
+    <div class="page-header">
+      <div class="page-title">Bulk Email</div>
+      <div class="page-sub">Send an announcement or offer to all your active users at once.</div>
+    </div>
+    <div class="card" style="max-width:600px;">
+      <div class="form-group">
+        <label class="form-label">Subject</label>
+        <input type="text" class="form-input" id="email-subject" placeholder="e.g. 🎉 Special offer this weekend!">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Message</label>
+        <textarea class="form-textarea" id="email-message" placeholder="Type your message here…"></textarea>
+      </div>
+      <div id="email-alert" class="alert"></div>
+      <button class="btn btn-primary" onclick="sendBulkEmail()">
+        <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Send to All Users
+      </button>
+    </div>
+  </div>
+
+  <!-- SERVICES -->
+  <div class="view" id="view-services">
+    <div class="page-header">
+      <div class="page-title">Services & Pricing</div>
+      <div class="page-sub">View all services. Use the Price Editor to update prices.</div>
+    </div>
+    <div style="margin-bottom:20px;">
+      <a href="nexaline-prices.html" target="_blank" class="btn btn-primary">
+        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Open Price Editor
+      </a>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Service</th><th>Country</th><th>Price (₦)</th><th>Status</th></tr></thead>
+        <tbody id="services-body">
+          <tr><td colspan="4"><div class="empty"><h3>Loading...</h3></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- User Modal -->
+<div class="modal-overlay" id="user-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeUserModal()">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="modal-title" id="modal-user-name">User Details</div>
+    <div class="modal-row"><span>Email</span><span id="modal-user-email">—</span></div>
+    <div class="modal-row"><span>Phone</span><span id="modal-user-phone">—</span></div>
+    <div class="modal-row"><span>Wallet Balance</span><span id="modal-user-balance">—</span></div>
+    <div class="modal-row"><span>Total Orders</span><span id="modal-user-orders">—</span></div>
+    <div class="modal-row"><span>Status</span><span id="modal-user-status">—</span></div>
+    <div class="modal-row"><span>Role</span><span id="modal-user-role">—</span></div>
+    <div class="modal-row"><span>Joined</span><span id="modal-user-joined">—</span></div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="modal-block-btn" onclick="toggleBlock()">Block User</button>
+      <button class="btn btn-ghost" onclick="closeUserModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://silver-giraffe-369149.hostingersite.com/api';
+
+function getToken() {
+  return sessionStorage.getItem('nx_token') || localStorage.getItem('nx_token');
+}
+function getUser() {
+  try { return JSON.parse(sessionStorage.getItem('nx_user') || localStorage.getItem('nx_user') || 'null'); } catch(e){return null;}
+}
+
+async function apiFetch(path, opts={}) {
+  const res = await fetch(API + path, {
+    ...opts,
+    headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+getToken(), ...(opts.headers||{}) }
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+// ── GATE CHECK ──
+async function init() {
+  const token = getToken();
+  const user = getUser();
+  if (!token) { showGate('Not logged in. Please log in first.'); return; }
+  if (!user) { showGate('Session expired. Please log in again.'); return; }
+  if (user.role !== 'admin') {
+    try {
+      const data = await apiFetch('/auth/profile');
+      if (data.user?.role !== 'admin') { showGate('Access denied. Admin only.'); return; }
+    } catch(e) { showGate('Could not verify admin access.'); return; }
+  }
+  // Set admin info in sidebar
+  document.getElementById('admin-name').textContent = user.name || 'Admin';
+  document.getElementById('admin-avatar').textContent = (user.name||'A').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('admin-gate').style.display = 'none';
+  document.getElementById('admin-app').style.display = 'block';
+  loadOverview();
+  loadTodayStats();
+}
+
+function showGate(msg) {
+  document.getElementById('gate-msg').textContent = msg;
+  document.getElementById('admin-gate').style.display = 'flex';
+  document.getElementById('admin-app').style.display = 'none';
+}
+
+// ── NAVIGATION ──
+const VIEWS = ['overview','today','pending','users','orders','transactions','promos','bulkemail','services'];
+
+function switchView(name) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('view-'+name)?.classList.add('active');
+  document.querySelector(`[data-view="${name}"]`)?.classList.add('active');
+  closeMobile();
+  if (name==='overview') { loadOverview(); loadTodayStats(); }
+  if (name==='today') loadTodayOrders();
+  if (name==='pending') loadPendingOrders();
+  if (name==='users') loadUsers();
+  if (name==='orders') loadOrders();
+  if (name==='transactions') loadTransactions();
+  if (name==='promos') loadPromos();
+  if (name==='services') loadServices();
+}
+
+document.querySelectorAll('.nav-item[data-view]').forEach(btn => {
+  btn.addEventListener('click', () => switchView(btn.dataset.view));
+});
+
+// ── MOBILE ──
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebar-overlay');
+function closeMobile() { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+document.getElementById('mobile-menu-btn').addEventListener('click', () => { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+overlay.addEventListener('click', closeMobile);
+
+// ── SIGN OUT ──
+document.getElementById('signout-btn').addEventListener('click', () => {
+  if (!confirm('Sign out of admin panel?')) return;
+  sessionStorage.clear(); localStorage.removeItem('nx_token'); localStorage.removeItem('nx_user');
+  window.location.href = 'nexaline-login-register.html';
+});
+
+// ── OVERVIEW ──
+async function loadOverview() {
+  try {
+    const data = await apiFetch('/admin/stats');
+    document.getElementById('stat-users').textContent = data.total_users || 0;
+    document.getElementById('stat-revenue').textContent = '₦'+(data.total_revenue||0).toLocaleString();
+    document.getElementById('stat-success').textContent = (data.success_rate||0)+'%';
+    document.getElementById('stat-active').textContent = data.active_orders || 0;
+    renderRecentTx(data.recent_transactions || []);
+  } catch(e) { console.error('Overview error:',e); }
+}
+
+function renderRecentTx(txs) {
+  const el = document.getElementById('recent-tx-body');
+  if (!txs.length) { el.innerHTML = '<div class="empty"><h3>No transactions yet</h3></div>'; return; }
+  el.innerHTML = `<table style="width:100%;border-collapse:collapse;">
+    <thead><tr>
+      <th style="padding:10px 16px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-mute);border-bottom:1px solid var(--border);">User</th>
+      <th style="padding:10px 16px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-mute);border-bottom:1px solid var(--border);">Type</th>
+      <th style="padding:10px 16px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-mute);border-bottom:1px solid var(--border);">Amount</th>
+      <th style="padding:10px 16px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-mute);border-bottom:1px solid var(--border);">Status</th>
+      <th style="padding:10px 16px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-mute);border-bottom:1px solid var(--border);">Date</th>
+    </tr></thead>
+    <tbody>${txs.map(t=>`<tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+      <td style="padding:12px 16px;font-size:13px;">${t.user_name||'—'}</td>
+      <td style="padding:12px 16px;font-size:13px;text-transform:capitalize;">${t.type}</td>
+      <td style="padding:12px 16px;font-size:13px;font-weight:600;color:${t.type==='funding'?'var(--green)':'var(--text)'};">${t.type==='funding'?'+':''}₦${t.amount_ngn.toLocaleString()}</td>
+      <td style="padding:12px 16px;"><span class="badge badge-${t.status==='success'?'success':t.status==='failed'?'failed':'pending'}">${t.status}</span></td>
+      <td style="padding:12px 16px;font-size:12px;color:var(--text-soft);">${new Date(t.created_at).toLocaleDateString()}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+// ── TODAY STATS ──
+async function loadTodayStats() {
+  try {
+    const data = await apiFetch('/admin/stats/today');
+    document.getElementById('today-register').textContent = data.today.register;
+    document.getElementById('today-recharge').textContent = '₦'+(data.today.recharge_amount||0).toLocaleString();
+    document.getElementById('today-otp-sell').textContent = data.today.otp_sell;
+    document.getElementById('today-revenue').textContent = '₦'+(data.today.otp_sell_amount||0).toLocaleString();
+    document.getElementById('today-active-users').textContent = data.today.active_users;
+    document.getElementById('total-pending').textContent = data.totals.active_numbers_pending;
+    document.getElementById('total-otp-sell').textContent = data.totals.otp_sell;
+    document.getElementById('total-user-balance').textContent = '₦'+(data.totals.user_balance||0).toLocaleString();
+    // Update nav badges
+    const pending = data.totals.active_numbers_pending;
+    const todayOrders = data.today.otp_sell;
+    const pb = document.getElementById('badge-pending');
+    const tb = document.getElementById('badge-today');
+    if (pending > 0) { pb.textContent = pending; pb.classList.add('show'); }
+    if (todayOrders > 0) { tb.textContent = todayOrders; tb.classList.add('show'); }
+  } catch(e) { console.error('Today stats error:',e); }
+}
+
+// ── TODAY ORDERS ──
+async function loadTodayOrders() {
+  const body = document.getElementById('today-orders-body');
+  try {
+    const data = await apiFetch('/admin/orders/today');
+    const orders = data.orders || [];
+    if (!orders.length) { body.innerHTML = '<tr><td colspan="8"><div class="empty"><h3>No orders today yet</h3><p>Come back later.</p></div></td></tr>'; return; }
+    body.innerHTML = orders.map(o=>`<tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+      <td style="padding:12px 16px;font-size:13px;font-weight:500;">${o.user_name}</td>
+      <td style="padding:12px 16px;font-size:13px;">${o.service_name}</td>
+      <td style="padding:12px 16px;font-size:13px;">${o.country}</td>
+      <td style="padding:12px 16px;"><span class="mono">${o.phone_number||'—'}</span></td>
+      <td style="padding:12px 16px;"><span class="mono" style="color:var(--cyan);">${o.otp_code||'—'}</span></td>
+      <td style="padding:12px 16px;font-size:13px;font-weight:600;">₦${o.price_ngn.toLocaleString()}</td>
+      <td style="padding:12px 16px;"><span class="badge badge-${o.status==='success'?'success':o.status==='failed'?'failed':'pending'}">${o.status}</span></td>
+      <td style="padding:12px 16px;font-size:11px;color:var(--text-soft);">${new Date(o.created_at).toLocaleTimeString()}</td>
+    </tr>`).join('');
+  } catch(e) { body.innerHTML='<tr><td colspan="8"><div class="empty"><h3>Failed to load</h3></div></td></tr>'; }
+}
+
+// ── PENDING ORDERS ──
+async function loadPendingOrders() {
+  const body = document.getElementById('pending-orders-body');
+  try {
+    const data = await apiFetch('/admin/orders/pending');
+    const orders = data.orders || [];
+    if (!orders.length) { body.innerHTML='<tr><td colspan="6"><div class="empty"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h3>No pending orders</h3><p>All numbers have received their OTP.</p></div></td></tr>'; return; }
+    body.innerHTML = orders.map(o=>`<tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+      <td style="padding:12px 16px;font-size:13px;">${o.user_name}</td>
+      <td style="padding:12px 16px;font-size:13px;">${o.service_name}</td>
+      <td style="padding:12px 16px;font-size:13px;">${o.country}</td>
+      <td style="padding:12px 16px;"><span class="mono">${o.phone_number||'Assigning…'}</span></td>
+      <td style="padding:12px 16px;font-size:13px;font-weight:600;">₦${o.price_ngn.toLocaleString()}</td>
+      <td style="padding:12px 16px;font-size:12px;color:var(--text-soft);">${new Date(o.created_at).toLocaleTimeString()}</td>
+    </tr>`).join('');
+  } catch(e) { body.innerHTML='<tr><td colspan="6"><div class="empty"><h3>Failed to load</h3></div></td></tr>'; }
+}
+
+// ── USERS ──
+let allUsers = [];
+async function loadUsers() {
+  const body = document.getElementById('users-body');
+  try {
+    const data = await apiFetch('/admin/users');
+    allUsers = data.users || [];
+    renderUsers(allUsers);
+  } catch(e) { body.innerHTML='<tr><td colspan="7"><div class="empty"><h3>Failed to load</h3></div></td></tr>'; }
+}
+
+function filterUsers(q) {
+  const filtered = allUsers.filter(u => u.name?.toLowerCase().includes(q.toLowerCase()) || u.email?.toLowerCase().includes(q.toLowerCase()));
+  renderUsers(filtered);
+}
+
+function renderUsers(users) {
+  const body = document.getElementById('users-body');
+  if (!users.length) { body.innerHTML='<tr><td colspan="7"><div class="empty"><h3>No users found</h3></div></td></tr>'; return; }
+  body.innerHTML = users.map(u=>`<tr style="border-bottom:1px solid rgba(255,255,255,0.03);cursor:pointer;" onclick="openUserModal(${JSON.stringify(JSON.stringify(u))})">
+    <td style="padding:12px 16px;font-size:13px;font-weight:600;">${u.name}</td>
+    <td style="padding:12px 16px;font-size:12px;color:var(--text-soft);">${u.email}</td>
+    <td style="padding:12px 16px;font-size:13px;font-weight:600;color:var(--cyan);">₦${(u.wallet_balance_ngn||0).toLocaleString()}</td>
+    <td style="padding:12px 16px;font-size:13px;">${u.total_orders||0}</td>
+    <td style="padding:12px 16px;"><span class="badge ${u.status==='active'?'badge-success':'badge-failed'}">${u.status}</span></td>
+    <td style="padding:12px 16px;font-size:12px;color:var(--text-soft);">${new Date(u.created_at).toLocaleDateString()}</td>
+    <td style="padding:12px 16px;"><span style="font-size:11px;padding:3px 8px;border-radius:6px;background:${u.role==='admin'?'var(--purple-dim)':'var(--blue-dim)'};color:${u.role==='admin'?'var(--purple)':'var(--blue)'};">${u.role}</span></td>
+  </tr>`).join('');
+}
+
+// ── USER MODAL ──
+let modalUserId = null;
+let modalUserStatus = null;
+function openUserModal(jsonStr) {
+  const u = JSON.parse(jsonStr);
+  modalUserId = u.id;
+  modalUserStatus = u.status;
+  document.getElementById('modal-user-name').textContent = u.name;
+  document.getElementById('modal-user-email').textContent = u.email;
+  document.getElementById('modal-user-phone').textContent = u.phone || '—';
+  document.getElementById('modal-user-balance').textContent = '₦'+(u.wallet_balance_ngn||0).toLocaleString();
+  document.getElementById('modal-user-orders').textContent = u.total_orders || 0;
+  document.getElementById('modal-user-status').textContent = u.status;
+  document.getElementById('modal-user-role').textContent = u.role;
+  document.getElementById('modal-user-joined').textContent = new Date(u.created_at).toLocaleDateString();
+  document.getElementById('modal-block-btn').textContent = u.status === 'suspended' ? 'Unblock User' : 'Block User';
+  document.getElementById('user-modal').classList.add('open');
+}
+function closeUserModal() { document.getElementById('user-modal').classList.remove('open'); }
+document.getElementById('user-modal').addEventListener('click', e => { if (e.target === document.getElementById('user-modal')) closeUserModal(); });
+
+async function toggleBlock() {
+  if (!modalUserId) return;
+  const action = modalUserStatus === 'suspended' ? 'Unblock' : 'Block';
+  if (!confirm(action + ' this user?')) return;
+  try {
+    const data = await apiFetch('/admin/users/'+modalUserId+'/block', { method:'POST' });
+    alert(data.message);
+    closeUserModal();
+    loadUsers();
+  } catch(e) { alert(e.message); }
+}
+
+// ── ORDERS ──
+async function loadOrders() {
+  const body = document.getElementById('orders-body');
+  try {
+    const data = await apiFetch('/admin/orders');
+    const orders = data.orders || [];
+    if (!orders.length) { body.innerHTML='<tr><td colspan="8"><div class="empty"><h3>No orders yet</h3></div></td></tr>'; return; }
+    body.innerHTML = orders.map(o=>`<tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+      <td style="padding:12px 16px;font-size:13px;">${o.user_name}</td>
+      <td style="padding:12px 16px;font-size:13px;">${o.service_name}</td>
+      <td style="padding:12px 16px;font-size:13px;">${o.country}</td>
+      <td style="padding:12px 16px;"><span class="mono">${o.phone_number||'—'}</span></td>
+      <td style="padding:12px 16px;"><span class="mono" style="color:var(--cyan);">${o.otp_code||'—'}</span></td>
+      <td style="padding:12px 16px;font-size:13px;font-weight:600;">₦${o.price_ngn.toLocaleString()}</td>
+      <td style="padding:12px 16px;"><span class="badge badge-${o.status==='success'?'success':o.status==='failed'?'failed':'pending'}">${o.status}</span></td>
+      <td style="padding:12px 16px;font-size:12px;color:var(--text-soft);">${new Date(o.created_at).toLocaleDateString()}</td>
+    </tr>`).join('');
+  } catch(e) { body.innerHTML='<tr><td colspan="8"><div class="empty"><h3>Failed to load</h3></div></td></tr>'; }
+}
+
+// ── TRANSACTIONS ──
+async function loadTransactions() {
+  const body = document.getElementById('transactions-body');
+  try {
+    const data = await apiFetch('/admin/transactions');
+    const txs = data.transactions || [];
+    if (!txs.length) { body.innerHTML='<tr><td colspan="6"><div class="empty"><h3>No transactions yet</h3></div></td></tr>'; return; }
+    body.innerHTML = txs.map(t=>`<tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+      <td style="padding:12px 16px;font-size:13px;">${t.user_name||'—'}</td>
+      <td style="padding:12px 16px;font-size:13px;text-transform:capitalize;">${t.type}</td>
+      <td style="padding:12px 16px;font-size:13px;font-weight:600;color:${t.type==='funding'?'var(--green)':'var(--text)'};">${t.type==='funding'?'+':''}₦${t.amount_ngn.toLocaleString()}</td>
+      <td style="padding:12px 16px;font-size:11px;color:var(--text-mute);font-family:monospace;">${t.reference}</td>
+      <td style="padding:12px 16px;"><span class="badge badge-${t.status==='success'?'success':t.status==='failed'?'failed':'pending'}">${t.status}</span></td>
+      <td style="padding:12px 16px;font-size:12px;color:var(--text-soft);">${new Date(t.created_at).toLocaleDateString()}</td>
+    </tr>`).join('');
+  } catch(e) { body.innerHTML='<tr><td colspan="6"><div class="empty"><h3>Failed to load</h3></div></td></tr>'; }
+}
+
+// ── PROMO CODES ──
+async function loadPromos() {
+  const body = document.getElementById('promos-body');
+  try {
+    const data = await apiFetch('/admin/promos');
+    const promos = data.promos || [];
+    if (!promos.length) { body.innerHTML='<tr><td colspan="5"><div class="empty"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><h3>No promo codes yet</h3><p>Create your first code above.</p></div></td></tr>'; return; }
+    body.innerHTML = promos.map(p=>`<tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+      <td style="padding:12px 16px;font-size:14px;font-weight:700;font-family:monospace;color:var(--cyan);">${p.code}</td>
+      <td style="padding:12px 16px;font-size:13px;">${p.discount_percent?p.discount_percent+'% off':''}${p.discount_ngn?' ₦'+p.discount_ngn.toLocaleString()+' off':''}</td>
+      <td style="padding:12px 16px;font-size:13px;">${p.uses} / ${p.max_uses}</td>
+      <td style="padding:12px 16px;font-size:12px;color:var(--text-soft);">${new Date(p.created_at).toLocaleDateString()}</td>
+      <td style="padding:12px 16px;"><button class="btn btn-danger btn-sm" onclick="deletePromo(${p.id})">Delete</button></td>
+    </tr>`).join('');
+  } catch(e) {}
+}
+
+async function createPromo() {
+  const code = document.getElementById('promo-code').value.trim();
+  const percent = parseInt(document.getElementById('promo-percent').value)||0;
+  const ngn = parseInt(document.getElementById('promo-ngn').value)||0;
+  const max = parseInt(document.getElementById('promo-max').value)||100;
+  const alertEl = document.getElementById('promo-alert');
+  if (!code) { showAlert(alertEl,'Please enter a code.','error'); return; }
+  try {
+    await apiFetch('/admin/promos',{method:'POST',body:JSON.stringify({code,discount_percent:percent,discount_ngn:ngn,max_uses:max})});
+    showAlert(alertEl,'Promo code created!','success');
+    document.getElementById('promo-code').value='';
+    document.getElementById('promo-percent').value='';
+    document.getElementById('promo-ngn').value='';
+    loadPromos();
+  } catch(e) { showAlert(alertEl,e.message,'error'); }
+}
+
+async function deletePromo(id) {
+  if (!confirm('Delete this promo code?')) return;
+  try { await apiFetch('/admin/promos/'+id,{method:'DELETE'}); loadPromos(); } catch(e) { alert(e.message); }
+}
+
+// ── BULK EMAIL ──
+async function sendBulkEmail() {
+  const subject = document.getElementById('email-subject').value.trim();
+  const message = document.getElementById('email-message').value.trim();
+  const alertEl = document.getElementById('email-alert');
+  if (!subject||!message) { showAlert(alertEl,'Please fill in subject and message.','error'); return; }
+  if (!confirm('Send this email to ALL active users?')) return;
+  try {
+    const data = await apiFetch('/admin/email/bulk',{method:'POST',body:JSON.stringify({subject,message})});
+    showAlert(alertEl,data.message,'success');
+  } catch(e) { showAlert(alertEl,e.message,'error'); }
+}
+
+// ── SERVICES ──
+async function loadServices() {
+  const body = document.getElementById('services-body');
+  try {
+    const data = await apiFetch('/services');
+    const services = data.services || [];
+    if (!services.length) { body.innerHTML='<tr><td colspan="4"><div class="empty"><h3>No services</h3></div></td></tr>'; return; }
+    body.innerHTML = services.map(s=>`<tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+      <td style="padding:12px 16px;font-size:13px;font-weight:600;">${s.name}</td>
+      <td style="padding:12px 16px;font-size:13px;">${s.country}</td>
+      <td style="padding:12px 16px;font-size:13px;font-weight:600;color:var(--cyan);">₦${s.price_ngn.toLocaleString()}</td>
+      <td style="padding:12px 16px;"><span class="badge badge-success">Active</span></td>
+    </tr>`).join('');
+  } catch(e) { body.innerHTML='<tr><td colspan="4"><div class="empty"><h3>Failed to load</h3></div></td></tr>'; }
+}
+
+// ── HELPERS ──
+function showAlert(el, msg, type) {
+  el.textContent = msg;
+  el.className = 'alert alert-'+type+' show';
+  setTimeout(()=>el.className='alert',5000);
+}
+
+// ── START ──
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexaLine — Fund Wallet</title>
+<style>
+  :root {
+    --bg: #0a0e16;
+    --bg-panel: #0f1420;
+    --bg-card: #131927;
+    --border: #1f2839;
+    --border-soft: #181f2e;
+    --text: #e8ecf4;
+    --text-dim: #8893a8;
+    --text-faint: #5a6478;
+    --accent: #3d8bff;
+    --accent-bright: #5b9fff;
+    --accent-dim: #1a3a66;
+    --success: #2ecf8a;
+    --danger: #ff5c70;
+    --font-display: 'Sora', system-ui, sans-serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    padding: 32px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 24px;
+  }
+
+  .brand-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent), #1a3a8c);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 800;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .sub { font-size: 13.5px; color: var(--text-dim); margin-bottom: 24px; }
+
+  .login-gate {
+    text-align: center;
+    padding: 24px 0;
+    color: var(--text-dim);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .login-gate a {
+    color: var(--accent-bright);
+    font-weight: 600;
+  }
+
+  .balance-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 24px;
+  }
+
+  .balance-label { font-size: 12px; color: var(--text-dim); margin-bottom: 6px; }
+
+  .balance-value {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 700;
+  }
+
+  .field { margin-bottom: 18px; }
+
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    margin-bottom: 7px;
+  }
+
+  .amount-input {
+    position: relative;
+  }
+
+  .amount-input span {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+    font-weight: 600;
+  }
+
+  .amount-input input {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 12px 14px 12px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    font-family: var(--font-body);
+  }
+
+  .amount-input input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(61,139,255,0.15);
+  }
+
+  .quick-amounts {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .quick-amount {
+    flex: 1;
+    padding: 8px 0;
+    text-align: center;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+
+  .quick-amount:hover { border-color: var(--accent); color: var(--text); }
+
+  .field-error {
+    font-size: 12.5px;
+    color: var(--danger);
+    margin-top: 6px;
+    display: none;
+  }
+
+  .field-error.show { display: block; }
+
+  .btn-primary {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), #2f6fd6);
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    padding: 13px 0;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(61,139,255,0.3);
+  }
+
+  .btn-primary:hover { filter: brightness(1.08); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .spinner {
+    display: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto;
+  }
+
+  .btn-primary.loading .btn-label { display: none; }
+  .btn-primary.loading .spinner { display: block; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .banner {
+    display: none;
+    padding: 12px 14px;
+    border-radius: 9px;
+    font-size: 13px;
+    margin-bottom: 18px;
+    line-height: 1.5;
+  }
+
+  .banner.show { display: block; }
+  .banner.error { background: rgba(255,92,112,0.08); border: 1px solid rgba(255,92,112,0.3); color: #ff8a96; }
+  .banner.info { background: rgba(61,139,255,0.08); border: 1px solid rgba(61,139,255,0.3); color: var(--accent-bright); }
+  .banner.success { background: rgba(46,207,138,0.08); border: 1px solid rgba(46,207,138,0.3); color: #6fe3ad; }
+
+  .stub-note {
+    font-size: 12px;
+    color: var(--text-faint);
+    text-align: center;
+    margin-top: 16px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="brand">
+    <div class="brand-mark">N</div>
+    NexaLine
+  </div>
+
+  <div id="logged-out-view" style="display:none;">
+    <div class="login-gate">
+      You need to be logged in to fund your wallet.<br>
+      Go back to the login page, log in, then return here.
+    </div>
+  </div>
+
+  <div id="logged-in-view" style="display:none;">
+    <h1>Fund your wallet</h1>
+    <div class="sub" id="welcome-msg"></div>
+
+    <div class="banner" id="banner"></div>
+
+    <div class="balance-box">
+      <div class="balance-label">Current balance</div>
+      <div class="balance-value" id="balance-value">₦0</div>
+    </div>
+
+    <form id="fund-form">
+      <div class="field">
+        <label for="amount">Amount to add</label>
+        <div class="amount-input">
+          <span>₦</span>
+          <input type="number" id="amount" placeholder="5000" min="100" step="1">
+        </div>
+        <div class="quick-amounts">
+          <div class="quick-amount" data-amount="1000">₦1,000</div>
+          <div class="quick-amount" data-amount="5000">₦5,000</div>
+          <div class="quick-amount" data-amount="10000">₦10,000</div>
+        </div>
+        <div class="field-error" id="amount-error">Enter at least ₦100.</div>
+      </div>
+
+      <button type="submit" class="btn-primary" id="fund-submit">
+        <span class="btn-label">Continue to payment</span>
+        <span class="spinner"></span>
+      </button>
+    </form>
+
+    <div class="stub-note" id="stub-note"></div>
+  </div>
+</div>
+
+<script>
+  const API_BASE = 'http://localhost:4000/api';
+
+  const token = sessionStorage.getItem('nexaline_token');
+  const userJson = sessionStorage.getItem('nexaline_user');
+
+  if (!token || !userJson) {
+    document.getElementById('logged-out-view').style.display = 'block';
+  } else {
+    document.getElementById('logged-in-view').style.display = 'block';
+    const user = JSON.parse(userJson);
+    document.getElementById('welcome-msg').textContent = `Logged in as ${user.name}`;
+    loadBalance();
+  }
+
+  async function loadBalance() {
+    try {
+      const response = await fetch(`${API_BASE}/wallet`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (response.ok) {
+        document.getElementById('balance-value').textContent = `₦${data.balanceNgn.toLocaleString()}`;
+      }
+    } catch (err) {
+      showBanner('error', "Couldn't load your balance. Make sure your backend is running.");
+    }
+  }
+
+  function showBanner(type, message) {
+    const banner = document.getElementById('banner');
+    banner.className = `banner show ${type}`;
+    banner.textContent = message;
+  }
+
+  document.querySelectorAll('.quick-amount').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('amount').value = btn.dataset.amount;
+    });
+  });
+
+  document.getElementById('fund-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const amountInput = document.getElementById('amount');
+    const amount = parseInt(amountInput.value, 10);
+    const errorEl = document.getElementById('amount-error');
+
+    if (!amount || amount < 100) {
+      errorEl.classList.add('show');
+      return;
+    }
+    errorEl.classList.remove('show');
+
+    const submitBtn = document.getElementById('fund-submit');
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+
+    try {
+      const response = await fetch(`${API_BASE}/wallet/fund`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          amountNgn: amount,
+          redirectUrl: window.location.href
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        showBanner('error', data.error || 'Something went wrong.');
+        return;
+      }
+
+      if (data.stub) {
+        // Your Flutterwave keys aren't live yet, or this matched stub mode —
+        // simulate completing the payment immediately for testing.
+        document.getElementById('stub-note').textContent =
+          'Stub mode detected — simulating a completed payment for testing.';
+
+        const verifyResponse = await fetch(`${API_BASE}/wallet/verify`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ reference: data.reference })
+        });
+        const verifyData = await verifyResponse.json();
+
+        if (verifyResponse.ok) {
+          showBanner('success', `Wallet funded with ₦${amount.toLocaleString()}.`);
+          loadBalance();
+        } else {
+          showBanner('error', verifyData.error || 'Payment verification failed.');
+        }
+      } else {
+        // Real Flutterwave checkout — send the user to the real payment page.
+        showBanner('info', 'Redirecting you to Flutterwave to complete payment...');
+        window.location.href = data.checkoutUrl;
+      }
+    } catch (err) {
+      showBanner('error', "Couldn't reach the server. Make sure your backend is running.");
+    } finally {
+      submitBtn.classList.remove('loading');
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>

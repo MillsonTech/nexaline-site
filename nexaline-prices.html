@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexaLine — Price Editor</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #080C14;
+  color: #fff;
+  min-height: 100vh;
+  padding: 32px 20px;
+}
+h1 {
+  font-size: 22px; font-weight: 800;
+  margin-bottom: 6px;
+}
+h1 span { color: #00D4FF; }
+.sub { font-size: 13px; color: #5A6A84; margin-bottom: 20px; }
+
+.controls {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 20px; max-width: 700px;
+}
+.search-box {
+  flex: 1; min-width: 200px;
+  display: flex; align-items: center; gap: 8px;
+  background: #0F1624;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+.search-box svg { width: 15px; height: 15px; stroke: #5A6A84; fill: none; stroke-width: 1.8; flex-shrink: 0; }
+.search-box input {
+  background: none; border: none; color: #fff;
+  font-size: 14px; outline: none; width: 100%;
+  font-family: inherit;
+}
+.search-box input::placeholder { color: #3D4F6B; }
+.country-select {
+  background: #0F1624;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+}
+.country-select option { background: #0F1624; }
+
+.result-count {
+  font-size: 12px; color: #5A6A84;
+  margin-bottom: 14px; max-width: 700px;
+}
+
+.table-wrap {
+  background: #0F1624;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  overflow: hidden;
+  max-width: 700px;
+}
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  text-align: left;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: #5A6A84;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: #0F1624;
+  position: sticky; top: 0;
+}
+tbody tr { transition: background 0.15s; }
+tbody tr:hover { background: rgba(255,255,255,0.02); }
+tbody td {
+  padding: 13px 16px;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+tbody tr:last-child td { border-bottom: none; }
+
+.price-cell {
+  display: flex; align-items: center; gap: 8px;
+}
+.price-input {
+  background: #182030;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+  color: #fff;
+  padding: 7px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  width: 130px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.price-input:focus { border-color: #1E6BFF; }
+
+.save-btn {
+  background: #1E6BFF;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.save-btn:hover { background: #2d7bff; }
+.save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.save-btn.saved {
+  background: rgba(16,185,129,0.15);
+  color: #10B981;
+  border: 1px solid rgba(16,185,129,0.3);
+}
+
+.alert {
+  padding: 12px 16px; border-radius: 10px;
+  font-size: 13px; margin-bottom: 20px;
+  display: none; max-width: 700px;
+}
+.alert.show { display: block; }
+.alert-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #FF6B6B; }
+.alert-success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); color: #34D399; }
+
+.loading { color: #5A6A84; font-size: 14px; padding: 40px 20px; text-align: center; }
+
+.back-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: #5A6A84; font-size: 13px;
+  background: none; border: none; cursor: pointer;
+  padding: 0; margin-bottom: 20px;
+  transition: color 0.15s;
+}
+.back-btn:hover { color: #C8D6EF; }
+</style>
+</head>
+<body>
+
+<button class="back-btn" onclick="history.back()">
+  ← Back to Admin
+</button>
+
+<h1>Price Editor — <span>NexaLine</span></h1>
+<p class="sub">Search by service or country, edit the price, then click Save.</p>
+
+<div id="alert" class="alert"></div>
+
+<div class="controls">
+  <div class="search-box">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="search-input" placeholder="Search service (e.g. WhatsApp)…" oninput="applyFilters()">
+  </div>
+  <select class="country-select" id="country-filter" onchange="applyFilters()">
+    <option value="">All countries</option>
+  </select>
+</div>
+
+<div class="result-count" id="result-count"></div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Service</th>
+        <th>Country</th>
+        <th>Price (₦)</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="services-body">
+      <tr><td colspan="4" class="loading">Loading services…</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+const API = 'https://silver-giraffe-369149.hostingersite.com/api';
+let ALL_SERVICES = [];
+
+function getToken() {
+  return sessionStorage.getItem('nx_token') || localStorage.getItem('nx_token');
+}
+
+function showAlert(msg, type) {
+  const el = document.getElementById('alert');
+  el.textContent = msg;
+  el.className = 'alert alert-' + type + ' show';
+  setTimeout(() => el.className = 'alert', 4000);
+}
+
+async function loadServices() {
+  const body = document.getElementById('services-body');
+  try {
+    const res = await fetch(API + '/services');
+    const data = await res.json();
+    ALL_SERVICES = data.services || [];
+
+    if (!ALL_SERVICES.length) {
+      body.innerHTML = '<tr><td colspan="4" class="loading">No services found.</td></tr>';
+      return;
+    }
+
+    // Populate country filter dropdown
+    const countries = [...new Set(ALL_SERVICES.map(s => s.country))].sort();
+    const countrySelect = document.getElementById('country-filter');
+    countries.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c;
+      opt.textContent = c;
+      countrySelect.appendChild(opt);
+    });
+
+    renderRows(ALL_SERVICES);
+
+  } catch(e) {
+    body.innerHTML = '<tr><td colspan="4" class="loading">Could not load services. Make sure your backend is running.</td></tr>';
+  }
+}
+
+function renderRows(list) {
+  const body = document.getElementById('services-body');
+  const countEl = document.getElementById('result-count');
+
+  countEl.textContent = list.length + ' result' + (list.length === 1 ? '' : 's');
+
+  if (!list.length) {
+    body.innerHTML = '<tr><td colspan="4" class="loading">No matches. Try a different search.</td></tr>';
+    return;
+  }
+
+  body.innerHTML = '';
+  list.forEach(s => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${s.name}</strong></td>
+      <td>${s.country}</td>
+      <td>
+        <div class="price-cell">
+          <span style="color:#5A6A84;font-size:13px;">₦</span>
+          <input
+            class="price-input"
+            type="number"
+            value="${s.price_ngn}"
+            min="1"
+            data-original="${s.price_ngn}"
+            id="price-${s.id}"
+          >
+        </div>
+      </td>
+      <td>
+        <button class="save-btn" id="btn-${s.id}" onclick="savePrice(${s.id})">
+          Save
+        </button>
+      </td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+function applyFilters() {
+  const query = document.getElementById('search-input').value.trim().toLowerCase();
+  const country = document.getElementById('country-filter').value;
+
+  let filtered = ALL_SERVICES;
+  if (query) {
+    filtered = filtered.filter(s => s.name.toLowerCase().includes(query));
+  }
+  if (country) {
+    filtered = filtered.filter(s => s.country === country);
+  }
+  renderRows(filtered);
+}
+
+async function savePrice(serviceId) {
+  const input = document.getElementById('price-' + serviceId);
+  const btn = document.getElementById('btn-' + serviceId);
+  const newPrice = parseInt(input.value, 10);
+
+  if (!newPrice || newPrice < 1) {
+    showAlert('Please enter a valid price greater than 0.', 'error');
+    input.focus();
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    const token = getToken();
+    const res = await fetch(API + '/admin/services/' + serviceId + '/price', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({ price_ngn: newPrice })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || 'Failed to update');
+
+    input.dataset.original = newPrice;
+    // Update in-memory cache too so filters stay correct
+    const cached = ALL_SERVICES.find(s => s.id === serviceId);
+    if (cached) cached.price_ngn = newPrice;
+
+    btn.textContent = '✓ Saved';
+    btn.classList.add('saved');
+    setTimeout(() => {
+      btn.textContent = 'Save';
+      btn.classList.remove('saved');
+      btn.disabled = false;
+    }, 2000);
+
+    showAlert(`${input.closest('tr').querySelector('strong').textContent} price updated to ₦${newPrice.toLocaleString()}.`, 'success');
+
+  } catch(e) {
+    showAlert(e.message || 'Could not save price.', 'error');
+    btn.textContent = 'Save';
+    btn.disabled = false;
+  }
+}
+
+// Allow pressing Enter to save
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.classList.contains('price-input')) {
+    const id = e.target.id.replace('price-', '');
+    savePrice(parseInt(id));
+  }
+});
+
+loadServices();
+</script>
+</body>
+</html>
