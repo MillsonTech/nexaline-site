@@ -1780,9 +1780,9 @@ document.getElementById('confirm-buy-btn').addEventListener('click', async () =>
   }
   btn.disabled = true; btn.textContent = 'Processing…';
   try {
-    const data = await apiFetch('/orders/buy', {
+    const data = await apiFetch('/orders', {
       method: 'POST',
-      body: JSON.stringify({ service_id: selectedCountry.id })
+      body: JSON.stringify({ serviceId: selectedCountry.id })
     });
     userBalance -= selectedCountry.price;
     document.getElementById('buy-step-3').style.display = 'none';
