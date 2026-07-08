@@ -1328,8 +1328,14 @@ async function loadBalance() {
     const data = await apiFetch('/wallet/balance');
     userBalance = data.balance_ngn || 0;
     const fmt = '₦' + userBalance.toLocaleString();
-    document.getElementById('home-balance').textContent = fmt;
-  } catch(e) {}
+    // Update ALL balance displays on the page
+    ['home-balance', 'wallet-balance-display', 'pstat-balance'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = fmt;
+    });
+    // Also update any element with class balance-amount
+    document.querySelectorAll('.balance-amount').forEach(el => el.textContent = fmt);
+  } catch(e) { console.error('Balance load error:', e); }
 }
 
 async function loadServices() {
@@ -1878,6 +1884,8 @@ document.getElementById('fund-btn').addEventListener('click', async () => {
       body: JSON.stringify({ amount_ngn: amount, redirect_url: window.location.href })
     });
     if (data.payment_link) {
+      // Store reference so we can verify on return
+      localStorage.setItem('pending_tx_ref', data.reference || '');
       window.location.href = data.payment_link;
     } else {
       showAlert(alertEl, data.message || 'Payment initiated (stub mode)', 'info');
@@ -1985,7 +1993,33 @@ function checkAdminAccess() {
   } catch(e) {}
 }
 
+
+// Auto-refresh balance every 30 seconds
+setInterval(() => {
+  if (getToken()) loadBalance();
+}, 30000);
+
 // ── START ──
+
+  // Check if returning from Flutterwave payment
+  const _txRef = localStorage.getItem('pending_tx_ref');
+  const _urlStatus = new URLSearchParams(window.location.search).get('status');
+  if (_txRef && _urlStatus === 'successful') {
+    localStorage.removeItem('pending_tx_ref');
+    setTimeout(async () => {
+      try {
+        const vData = await apiFetch('/wallet/verify/' + _txRef);
+        if (vData && vData.success) {
+          await loadBalance();
+          showToast('Wallet funded successfully! ₦' + vData.balance_ngn.toLocaleString() + ' 🎉');
+        } else {
+          await loadBalance(); // refresh anyway
+        }
+      } catch(e) { await loadBalance(); }
+      window.history.replaceState({}, '', window.location.pathname);
+    }, 1500);
+  }
+
 init();
 checkAdminAccess();
 </script>
