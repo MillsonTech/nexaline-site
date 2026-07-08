@@ -1238,13 +1238,6 @@ async function apiFetch(path, opts = {}) {
       ...(opts.headers || {})
     }
   });
-  if (res.status === 401) {
-    sessionStorage.clear();
-    localStorage.removeItem('nx_token');
-    localStorage.removeItem('nx_user');
-    window.location.href = 'nexaline-login-register.html';
-    return {};
-  }
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Request failed');
   return data;
