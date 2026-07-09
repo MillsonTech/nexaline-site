@@ -1813,10 +1813,10 @@ function pollForOTP(orderId) {
       return;
     }
     try {
-      const data = await apiFetch(`/orders/${orderId}/check-otp`);
-      if (data.otp_code) {
+      const data = await apiFetch(`/orders/${orderId}/otp`);
+      if (data.otpCode || data.otp_code) {
         clearInterval(pollTimer);
-        document.getElementById('otp-code-display').textContent = data.otp_code;
+        document.getElementById('otp-code-display').textContent = data.otpCode || data.otp_code;
         timerEl.textContent = 'OTP received ✓';
         await loadBalance();
       }
