@@ -1229,7 +1229,7 @@ if (!getToken()) {
   }
 }
 
-async function apiFetch(path, opts = {}) {
+async function apiFetch(path, opts = {}, retry = true) {
   const res = await fetch(API + path, {
     ...opts,
     headers: {
@@ -1239,14 +1239,18 @@ async function apiFetch(path, opts = {}) {
     }
   });
   const data = await res.json();
-  if (!res.ok) if (data.error && (data.error.includes('session') || data.error.includes('log in') || data.error.includes('expired'))) {
+  if (res.status === 401 && retry) {
+    await new Promise(r => setTimeout(r, 2000));
+    return apiFetch(path, opts, false);
+  }
+  if (res.status === 401) {
     sessionStorage.clear();
     localStorage.removeItem('nx_token');
     localStorage.removeItem('nx_user');
     window.location.href = 'nexaline-login-register.html?msg=session';
     return {};
   }
-  throw new Error(data.error || 'Request failed');
+  if (!res.ok) throw new Error(data.error || 'Request failed');
   return data;
 }
 
