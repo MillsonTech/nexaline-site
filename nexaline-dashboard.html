@@ -1239,7 +1239,14 @@ async function apiFetch(path, opts = {}) {
     }
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Request failed');
+  if (!res.ok) if (data.error && (data.error.includes('session') || data.error.includes('log in') || data.error.includes('expired'))) {
+    sessionStorage.clear();
+    localStorage.removeItem('nx_token');
+    localStorage.removeItem('nx_user');
+    window.location.href = 'nexaline-login-register.html?msg=session';
+    return {};
+  }
+  throw new Error(data.error || 'Request failed');
   return data;
 }
 

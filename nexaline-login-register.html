@@ -552,6 +552,18 @@ if (googleToken && googleUser) {
   }
 }
 
+
+  // Show friendly message if redirected due to session expiry
+  const _msg = new URLSearchParams(window.location.search).get('msg');
+  if (_msg === 'session') {
+    const alertEl = document.getElementById('alert');
+    if (alertEl) {
+      alertEl.textContent = 'Your session expired. Please log in again.';
+      alertEl.className = 'alert alert-info show';
+    }
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
 </script>
 </body>
 </html>
