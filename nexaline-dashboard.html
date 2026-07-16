@@ -2032,6 +2032,14 @@ setInterval(() => {
   }
 
 init();
+
+  // Prevent back button from leaving dashboard
+  window.history.pushState(null, '', window.location.href);
+  window.addEventListener('popstate', function() {
+    window.history.pushState(null, '', window.location.href);
+  });
+
+
 checkAdminAccess();
 </script>
 </body>
