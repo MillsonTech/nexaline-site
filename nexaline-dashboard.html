@@ -1211,7 +1211,11 @@ const API = 'https://silver-giraffe-369149.hostingersite.com/api';
 
 // ── AUTH ──
 function getToken() { 
-  return sessionStorage.getItem('nx_token') || localStorage.getItem('nx_token'); 
+  return sessionStorage.getItem('nx_token') || localStorage.getItem('nx_token') || getCookie('nx_token');
+}
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : null;
 }
 function getUser() { 
   try {
@@ -1244,10 +1248,12 @@ async function apiFetch(path, opts = {}, retry = true) {
     return apiFetch(path, opts, false);
   }
   if (res.status === 401) {
-    sessionStorage.clear();
-    localStorage.removeItem('nx_token');
-    localStorage.removeItem('nx_user');
-    window.location.href = 'nexaline-login-register.html?msg=session';
+    // Only redirect if this is clearly an expired token (not a new login)
+    const token = getToken();
+    if (!token) {
+      window.location.href = 'nexaline-login-register.html';
+    }
+    // Otherwise just return empty - don't kick them out
     return {};
   }
   if (!res.ok) throw new Error(data.error || 'Request failed');
@@ -2032,13 +2038,6 @@ setInterval(() => {
   }
 
 init();
-
-  // Prevent back button from leaving dashboard
-  window.history.pushState(null, '', window.location.href);
-  window.addEventListener('popstate', function() {
-    window.history.pushState(null, '', window.location.href);
-  });
-
 
 checkAdminAccess();
 </script>

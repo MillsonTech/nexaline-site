@@ -564,6 +564,12 @@ if (googleToken && googleUser) {
     window.history.replaceState({}, '', window.location.pathname);
   }
 
+
+function setCookie(name, value, days) {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; SameSite=Lax';
+}
+
 </script>
 </body>
 </html>
