@@ -1325,6 +1325,8 @@ async function init() {
     document.getElementById('sidebar-avatar').textContent = initials;
     document.getElementById('home-greeting').textContent = `Welcome back, ${user.name?.split(' ')[0] || 'there'} 👋`;
   }
+  // Small delay to ensure token is properly saved before making API calls
+  await new Promise(r => setTimeout(r, 500));
   await loadBalance();
   await loadServices();
   loadHomeData();
